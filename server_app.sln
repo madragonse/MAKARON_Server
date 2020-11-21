@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "server_app", "server_app\se
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "server_lib", "server_lib\server_lib.csproj", "{307AAFBE-2971-4F3B-94F7-00AB9F767041}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "game_lib", "game_lib\game_lib.csproj", "{1776A557-0A39-4B3D-87F0-EF11DA494004}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{307AAFBE-2971-4F3B-94F7-00AB9F767041}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{307AAFBE-2971-4F3B-94F7-00AB9F767041}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{307AAFBE-2971-4F3B-94F7-00AB9F767041}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1776A557-0A39-4B3D-87F0-EF11DA494004}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1776A557-0A39-4B3D-87F0-EF11DA494004}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1776A557-0A39-4B3D-87F0-EF11DA494004}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1776A557-0A39-4B3D-87F0-EF11DA494004}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

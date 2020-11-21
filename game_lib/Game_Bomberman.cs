@@ -6,9 +6,17 @@ using System.Threading.Tasks;
 
 namespace game_lib
 {
-    class BMBGame : Game
+    class Game_Bomberman : Game
     {
-        public BMBGame(uint playerLimit, ulong waitingTime) : base(playerLimit, waitingTime) { }
+        #region fields
+        ushort[,] map;
+        //SCORE
+        #endregion
+
+        public Game_Bomberman(uint playerLimit, ulong waitingTime) : base(playerLimit, waitingTime)
+        {
+            map = new ushort[20, 20];
+        }
 
         public override void StartGame()
         {
