@@ -7,7 +7,7 @@ using System.Text;
 
 namespace server_lib
 {
-    class Server
+    public class Server
     {
 
             #region fields
@@ -22,7 +22,6 @@ namespace server_lib
 
             public delegate void TransmissionDataDelegate(Session client);
             #endregion
-
 
             #region field_definitions
             public IPAddress IPAddress
@@ -151,6 +150,6 @@ namespace server_lib
             }
 
             #endregion
-        }
+    }
     
 }

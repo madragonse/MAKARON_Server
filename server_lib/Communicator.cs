@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace server_lib
 {
-    class Communicator
+    public class Communicator
     {
         private Server server;
         public Server Server { get => server; set => server = value; }

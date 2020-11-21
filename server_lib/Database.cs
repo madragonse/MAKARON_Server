@@ -6,7 +6,7 @@ using System.Text;
 
 namespace server_lib
 {
-    class DatabaseConector
+    public class DatabaseConector
     {
         #region mysql_Fields
 

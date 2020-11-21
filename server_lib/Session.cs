@@ -11,7 +11,7 @@ namespace server_lib
     /// Structure for holding information about individual server client sessions.
     /// That is- the TCP Stream of the client and his unique ID.
     /// </summary>
-    class Session
+    public class Session
     {
         public Session(int id, NetworkStream stream)
         {
