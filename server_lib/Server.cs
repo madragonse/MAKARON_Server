@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using communication;
 
 namespace server_lib
 {
@@ -15,12 +16,11 @@ namespace server_lib
             int port;
             int buffer_size = 1024;
             bool running;
-            List<byte[]> buffers = new List<byte[]>();
+            List<Communicator> communicators = new List<Communicator>();
             int clientCounter = 0;
-            Communicator communicator;
             TcpListener tcpListener;
-
-            public delegate void TransmissionDataDelegate(Session client);
+    
+            public delegate void TransmissionDataDelegate(game_lib.Session client);
             #endregion
 
             #region field_definitions
@@ -61,7 +61,7 @@ namespace server_lib
 
             }
             protected TcpListener TcpListener { get => tcpListener; set => tcpListener = value; }
-            public List<byte[]> Buffers { get => buffers; set => buffers = value; }
+            public List<Communicator> Communciators { get => communicators; set => communicators = value; }
             #endregion
 
             #region Constructors
@@ -74,7 +74,6 @@ namespace server_lib
                 running = false;
                 IPAddress = IP;
                 Port = port;
-                communicator = new Communicator(this);
                 if (!checkPort())
                 {
                     Port = 8000;
@@ -105,12 +104,14 @@ namespace server_lib
                 {
                     TcpClient tcpClient = TcpListener.AcceptTcpClient();
                     Console.Write("\nNew client connected! Client id: " + clientCounter);
-                    //create a new buffer for the client
-                    buffers.Add(new byte[buffer_size]);
+
                     NetworkStream stream = tcpClient.GetStream();
+                    game_lib.Session client= new game_lib.Session(clientCounter, stream);
+                    //create a new buffer for the client
+                    communicators.Add(new Communicator(client));
                     
                     TransmissionDataDelegate transmissionDelegate = new TransmissionDataDelegate(BeginDataTransmission);
-                    transmissionDelegate.BeginInvoke(new Session(clientCounter, stream), TransmissionCallback, tcpClient);
+                    transmissionDelegate.BeginInvoke(client, TransmissionCallback, tcpClient);
                     clientCounter++;
                 }
             }
@@ -126,15 +127,16 @@ namespace server_lib
             /// Welcomes given client to the server and allows him to proceed to log in or sign up.
             /// </summary>
             /// <param name="client"></param>
-            protected void BeginDataTransmission(Session client)
+            protected void BeginDataTransmission(game_lib.Session client)
             {
-                String bufferString = communicator.greetAndChooseOption(client);
 
-                if (bufferString == "s") { communicator.SignUp(client); }
+                String bufferString = communicators[client.Id].greetAndChooseOption();
+
+                if (bufferString == "s") { communicators[client.Id].SignUp(client); }
                 //after user signed up, make him log in
-                communicator.LogIn(client);
+                communicators[client.Id].LogIn(client);
                 //after sucesfull loging in, echo the client
-                communicator.LetPlay(client);
+                communicators[client.Id].LetPlay(client);
             }
 
 

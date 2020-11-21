@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace server_lib
+namespace communication
 {
     public class DatabaseConector
     {

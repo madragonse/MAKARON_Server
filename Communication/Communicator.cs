@@ -1,25 +1,44 @@
-﻿using game_lib;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using game_lib;
 
-namespace server_lib
+
+namespace communication
 {
     public class Communicator
     {
-        private Server server;
-        public Server Server { get => server; set => server = value; }
+        private Session session;
+        private byte[] buffer;
+        public Session Session { get => session; set => session = value; }
+        public byte[] Buffer { get => buffer; set => buffer = value; }
 
-        public Communicator(Server s)
+        public Communicator(Session s)
         {
-            this.server = s;
+            this.session = s;
+            this.buffer = new byte[1024];
         }
+
+
         private void sendToClient(String m, Session client)
         {
             byte[] message = Encoding.ASCII.GetBytes(m);
             client.Stream.Write(message, 0, message.Length);
+        }
+
+        private String getClientsResponse(Session client)
+        {
+            int messageLength = 0;
+            String response = "\r\n";
+            while (response == "\r\n")
+            {
+                messageLength = client.Stream.Read(Buffer, 0, Buffer.Length);
+                response = Encoding.UTF8.GetString(Buffer, 0, messageLength);
+            }
+
+            return response;
         }
 
         /// <summary>
@@ -28,15 +47,15 @@ namespace server_lib
         /// </summary>
         /// <param  Client structure="client"></param>
         /// <returns>Returns s if user chooses to sign up, and other strings for log in.</returns>
-        public String greetAndChooseOption(Session client)
+        public String greetAndChooseOption()
         {
             int messageLenght = 0;
 
-            sendToClient("\nWelcome to the server! Log in or Sign up (s-sign up/anything else-log in)", client);
+            sendToClient("\nWelcome to the server! Log in or Sign up (s-sign up/anything else-log in)", this.session);
            
             //wait for the response    
-            messageLenght = client.Stream.Read(server.Buffers[client.Id], 0, server.Buffer_size);
-            return Encoding.UTF8.GetString(server.Buffers[client.Id], 0, messageLenght);
+            messageLenght = session.Stream.Read(Buffer, 0, Buffer.Length);
+            return Encoding.UTF8.GetString(Buffer, 0, messageLenght);
         }
 
 
@@ -51,22 +70,29 @@ namespace server_lib
             client.Stream.ReadTimeout = 10000;
 
             //test games
-            GameManager.CreateGame(GameManager.GameName.BOMBERMAN, "TESTOWY POKOJ 1");
-            GameManager.CreateGame(GameManager.GameName.BOMBERMAN, "TESTOWY POKOJ 2");
-
+            GameManager.CreateGame(GameManager.GameName.BOMBERMAN,"TEST LOBBY FOR USER id="+client.Id);
             //list all currgames
             printCurrentGames(client);
 
             sendToClient("\n\rCreate a new game or join an existing one! (j- join/c-create)", client);
-            String response = getClientsResponse(client);
+            String response = "\r\n";
+            while (response == "\r\n")
+            {
+                response = getClientsResponse(client);
+            }
 
-   
             switch (response)
             {
 
                 //join game
                 case "j":
-
+                    sendToClient("\n\rChoose game id: ", client);
+                    String r = getClientsResponse(client);
+                    if (GameManager.JoinGame(r, client))
+                    {
+                        //do smth
+                        sendToClient("\n\rLobby joined!", client);
+                    }
                     break;
                 //create game
                 case "c":
@@ -80,8 +106,8 @@ namespace server_lib
             {
                 try
                 {
-                    int messageLenght = client.Stream.Read(server.Buffers[client.Id], 0, server.Buffer_size);
-                    client.Stream.Write(server.Buffers[client.Id], 0, messageLenght);
+                    int messageLenght = client.Stream.Read(Buffer, 0, Buffer.Length);
+                    client.Stream.Write(Buffer, 0, messageLenght);
                 }
                 catch (System.IO.IOException) { Console.Write("\rClient " + client.Id + " has disconected!"); break; }
             }
@@ -98,11 +124,6 @@ namespace server_lib
             }
         }
 
-        private String getClientsResponse(Session client)
-        {
-            int messageLength = client.Stream.Read(server.Buffers[client.Id], 0, server.Buffer_size);
-            return Encoding.UTF8.GetString(server.Buffers[client.Id], 0, messageLength);
-        }
 
         /// <summary>
         /// Allows user to log into an existing account.
@@ -122,8 +143,8 @@ namespace server_lib
             //in order to avoid \r\n randomly sent by Putty being taken as an input
             while (username == "\r\n")
             {
-                messageLenght = client.Stream.Read(server.Buffers[client.Id], 0, server.Buffer_size);
-                username = Encoding.UTF8.GetString(server.Buffers[client.Id], 0, messageLenght);
+                messageLenght = client.Stream.Read(Buffer, 0, Buffer.Length);
+                username = Encoding.UTF8.GetString(Buffer, 0, messageLenght);
             }
 
             message = Encoding.ASCII.GetBytes("\rPassword: ");
@@ -131,8 +152,8 @@ namespace server_lib
             //in order to avoid \r\n randomly sent by Putty being taken as an input
             while (password == "\r\n")
             {
-                messageLenght = client.Stream.Read(server.Buffers[client.Id], 0, server.Buffer_size);
-                password = Encoding.UTF8.GetString(server.Buffers[client.Id], 0, messageLenght); 
+                messageLenght = client.Stream.Read(Buffer, 0, Buffer.Length);
+                password = Encoding.UTF8.GetString(Buffer, 0, messageLenght); 
             }
 
             try
@@ -178,8 +199,8 @@ namespace server_lib
             //in order to avoid \r\n randomly sent by Putty being taken as an input
             while (username == "\r\n")
             {
-                messageLenght = client.Stream.Read(server.Buffers[client.Id], 0, server.Buffer_size);
-                username = Encoding.UTF8.GetString(server.Buffers[client.Id], 0, messageLenght);
+                messageLenght = client.Stream.Read(Buffer, 0, Buffer.Length);
+                username = Encoding.UTF8.GetString(Buffer, 0, messageLenght);
             }
 
 
@@ -188,8 +209,8 @@ namespace server_lib
             //in order to avoid \r\n randomly sent by Putty being taken as an input
             while (password == "\r\n")
             {
-                messageLenght = client.Stream.Read(server.Buffers[client.Id], 0, server.Buffer_size);
-                password = Encoding.UTF8.GetString(server.Buffers[client.Id], 0, messageLenght); ;
+                messageLenght = client.Stream.Read(Buffer, 0, Buffer.Length);
+                password = Encoding.UTF8.GetString(Buffer, 0, messageLenght); ;
             }
 
             message = Encoding.ASCII.GetBytes("\rConfirm Password: ");
@@ -197,8 +218,8 @@ namespace server_lib
             //in order to avoid \r\n randomly sent by Putty being taken as an input
             while (confpassword == "\r\n")
             {
-                messageLenght = client.Stream.Read(server.Buffers[client.Id], 0, server.Buffer_size);
-                confpassword = Encoding.UTF8.GetString(server.Buffers[client.Id], 0, messageLenght); ;
+                messageLenght = client.Stream.Read(Buffer, 0, Buffer.Length);
+                confpassword = Encoding.UTF8.GetString(Buffer, 0, messageLenght); ;
             }
 
             //Check if the two passwords are the same

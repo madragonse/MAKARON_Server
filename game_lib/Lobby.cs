@@ -66,12 +66,23 @@ namespace game_lib
             return false;
         }
 
-        public void AddPlayer(Session p)
+        public bool AddPlayer(Session p)
         {
-            if (p != null)
+            if (p != null || !CheckIfAlreadyJoined(p))
             {
                 this.waiting.Add(p);
+                return true;
             }
+            return false;
+        }
+
+        private bool CheckIfAlreadyJoined(Session p)
+        {
+            foreach(Session w in waiting)
+            {
+                if (w == p) { return true; }
+            }
+            return false;
         }
 
         public void RemovePlayer(Session p)

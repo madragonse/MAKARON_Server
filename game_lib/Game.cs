@@ -66,7 +66,9 @@ namespace game_lib
 
         public bool AddPlayer(Session p)
         {
-            if (this.State == Game_state.LOBBY) { lobby.AddPlayer(p); return true;}
+            if (this.State == Game_state.LOBBY) {
+                return lobby.AddPlayer(p);
+            }
             //
             return false;
         }
@@ -99,6 +101,7 @@ namespace game_lib
 
         private uint getNumberOfPlayers()
         {
+            if (this.State == Game_state.LOBBY) { return (uint)this.lobby.Waiting.Count; }
             return (uint) this.Players.Count;
         }
 

@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using game_lib;
+using communication;
 
-namespace server_lib
+namespace communication
 {
     class GameManager
     {
@@ -14,14 +14,14 @@ namespace server_lib
             BOMBERMAN
         }
 
-        public static List<Game> games= new List<Game>();
+        public static List<game_lib.Game> games= new List<game_lib.Game>();
 
         public static void CreateGame(GameName name,String roomName)
         {
             switch (name)
             {
                 case GameName.BOMBERMAN:
-                    games.Add(new Game_Bomberman(10,30,roomName));
+                    games.Add(new game_lib.Game_Bomberman(10,30,roomName));
                     break;
                 default: break;
             }
@@ -31,9 +31,16 @@ namespace server_lib
             games.RemoveAt(gameId);
         }
 
-        public static List<Game> GetAllGames()
+        public static List<game_lib.Game> GetAllGames()
         {
             return games;
+        }
+
+        public static bool JoinGame(String gameId, game_lib.Session session)
+        {
+            int id=Int32.Parse(gameId);
+            if (id > games.Count) { return false; }
+            return games[id].AddPlayer(session);
         }
         
     }

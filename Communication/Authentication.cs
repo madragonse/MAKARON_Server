@@ -6,7 +6,7 @@ using System.Text;
 using System.Security.Cryptography;
 using MySql.Data.MySqlClient;
 
-namespace server_lib
+namespace communication
 {
     public class Authentication
     {
