@@ -7,7 +7,7 @@ using communication;
 
 namespace communication
 {
-    class GameManager
+    public class GameManager
     {
         public enum GameName
         {
@@ -41,6 +41,14 @@ namespace communication
             int id=Int32.Parse(gameId);
             if (id > games.Count) { return false; }
             return games[id].AddPlayer(session);
+        }
+
+        public static void update(ulong deltaTime)
+        {
+            foreach(game_lib.Game g in games)
+            {
+                g.update(deltaTime);
+            }
         }
         
     }

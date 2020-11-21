@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using communication;
 
 namespace server_lib
@@ -148,10 +149,46 @@ namespace server_lib
                 Console.Write("\nStarting up the server...");
                 StartListening();
                 Console.Write("\nListening for clients commenced...");
+                //create global updating thread
+                GlobalUpdatingThread();
+       
+
+                //start listening for clients
                 AcceptClient();
             }
 
             #endregion
+            public void GlobalUpdatingThread()
+            {
+                new Thread(() =>
+                {
+                    while (this.running)
+                    {
+                        GameManager.update((ulong)0.1);
+                        Thread.Sleep(100);
+                    }
+
+                }).Start();
+
+                new Thread(() =>
+                {
+                    while (this.running)
+                    {
+                        //send ping to all clients
+                        foreach (Communicator c in Communciators)
+                        {
+                            ///ping(c.Session);
+                            ///
+                            ///
+
+                        }
+
+                    }
+                    
+                }).Start();
+
+            }
+  
     }
     
 }

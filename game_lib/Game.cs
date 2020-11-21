@@ -83,8 +83,7 @@ namespace game_lib
         {
             if (this.State == Game_state.LOBBY)
             {
-                bool end=lobby.update(deltaTime);
-                if (end) { StopLobby(); }
+                if (lobby.update(deltaTime)){StopLobby();}
             }
             if (this.State == Game.Game_state.IN_GAME || this.State == Game.Game_state.AFTER_GAME) { updateGame(deltaTime);}
         }

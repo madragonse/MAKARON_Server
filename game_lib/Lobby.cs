@@ -63,12 +63,18 @@ namespace game_lib
                 EndLobby();
                 return true;
             }
+
+            foreach(Session s in waiting)
+            {
+                if (s == null) { waiting.Remove(s);}
+            }
+
             return false;
         }
 
         public bool AddPlayer(Session p)
         {
-            if (p != null || !CheckIfAlreadyJoined(p))
+            if (p != null && !CheckIfAlreadyJoined(p) && waiting.Count< playerLimit)
             {
                 this.waiting.Add(p);
                 return true;

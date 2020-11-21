@@ -74,16 +74,16 @@ namespace communication
             //list all currgames
             printCurrentGames(client);
 
-            sendToClient("\n\rCreate a new game or join an existing one! (j- join/c-create)", client);
+            sendToClient("\n\rCreate a new game or join an existing one! (j- join/c-create/l-list all)", client);
             String response = "\r\n";
             while (response == "\r\n")
             {
                 response = getClientsResponse(client);
             }
 
+
             switch (response)
             {
-
                 //join game
                 case "j":
                     sendToClient("\n\rChoose game id: ", client);
@@ -95,8 +95,8 @@ namespace communication
                     }
                     break;
                 //create game
-                case "c":
-
+                case "l":
+                    printCurrentGames(client);
                     break;
                 default: break;
             }
