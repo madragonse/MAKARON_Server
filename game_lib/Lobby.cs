@@ -1,5 +1,4 @@
-﻿using server_lib;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace game_lib
 {
-    class Lobby
+    public class Lobby
     {
         #region fields
         private List<Session> waiting;
@@ -53,6 +52,7 @@ namespace game_lib
             PlayerLimit = playerLimit;
             WaitingTime = waitingTime;
             this.isOver = false;
+            this.Waiting = new List<Session>();
         }
 
         public bool update(ulong deltaTime)

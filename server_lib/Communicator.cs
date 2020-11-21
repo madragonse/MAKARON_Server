@@ -1,4 +1,5 @@
-﻿using System;
+﻿using game_lib;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,6 +16,11 @@ namespace server_lib
         {
             this.server = s;
         }
+        private void sendToClient(String m, Session client)
+        {
+            byte[] message = Encoding.ASCII.GetBytes(m);
+            client.Stream.Write(message, 0, message.Length);
+        }
 
         /// <summary>
         /// Greets given user and allows him to choose whether to log in or sign up.
@@ -26,10 +32,8 @@ namespace server_lib
         {
             int messageLenght = 0;
 
-            //greet the user, giving him an option to either sign up or log in
-            byte[] message = Encoding.ASCII.GetBytes("\nWelcome to the server! Log in or Sign up (s-sign up/anything else-log in)");
-            client.Stream.Write(message, 0, message.Length);
-
+            sendToClient("\nWelcome to the server! Log in or Sign up (s-sign up/anything else-log in)", client);
+           
             //wait for the response    
             messageLenght = client.Stream.Read(server.Buffers[client.Id], 0, server.Buffer_size);
             return Encoding.UTF8.GetString(server.Buffers[client.Id], 0, messageLenght);
@@ -42,12 +46,36 @@ namespace server_lib
         /// If the client doesn't respond for 10 seconds, he timesout.
         /// </summary>
         /// <param Client structure="client"></param>
-        public void Echo(Session client)
+        public void LetPlay(Session client)
         {
-
             client.Stream.ReadTimeout = 10000;
-            byte[] message = Encoding.ASCII.GetBytes("\n\rWelcome to the echo zone! (You have 10 seconds to shout something)");
-            client.Stream.Write(message, 0, message.Length);
+
+            //test games
+            GameManager.CreateGame(GameManager.GameName.BOMBERMAN, "TESTOWY POKOJ 1");
+            GameManager.CreateGame(GameManager.GameName.BOMBERMAN, "TESTOWY POKOJ 2");
+
+            //list all currgames
+            printCurrentGames(client);
+
+            sendToClient("\n\rCreate a new game or join an existing one! (j- join/c-create)", client);
+            String response = getClientsResponse(client);
+
+   
+            switch (response)
+            {
+
+                //join game
+                case "j":
+
+                    break;
+                //create game
+                case "c":
+
+                    break;
+                default: break;
+            }
+
+            //echo loop
             while (true)
             {
                 try
@@ -58,6 +86,22 @@ namespace server_lib
                 catch (System.IO.IOException) { Console.Write("\rClient " + client.Id + " has disconected!"); break; }
             }
 
+        }
+
+        private void printCurrentGames(Session client)
+        { 
+            sendToClient("\n----CURRENT GAMES----", client);
+            List<Game> currGames = GameManager.GetAllGames();
+            foreach (Game g in currGames)
+            {
+                sendToClient(g.ToString()+"\n", client);
+            }
+        }
+
+        private String getClientsResponse(Session client)
+        {
+            int messageLength = client.Stream.Read(server.Buffers[client.Id], 0, server.Buffer_size);
+            return Encoding.UTF8.GetString(server.Buffers[client.Id], 0, messageLength);
         }
 
         /// <summary>
@@ -88,7 +132,7 @@ namespace server_lib
             while (password == "\r\n")
             {
                 messageLenght = client.Stream.Read(server.Buffers[client.Id], 0, server.Buffer_size);
-                password = Encoding.UTF8.GetString(server.Buffers[client.Id], 0, messageLenght); ;
+                password = Encoding.UTF8.GetString(server.Buffers[client.Id], 0, messageLenght); 
             }
 
             try
@@ -191,6 +235,7 @@ namespace server_lib
                 }
             }
         }
+    
 
     }
 }

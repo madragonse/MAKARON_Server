@@ -1,5 +1,4 @@
-﻿using server_lib;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,6 +19,7 @@ namespace game_lib
         private List<Session> players;
         private Game_state state;
         private Lobby lobby;
+        private String name;
 
         #region field_definitions
         public List<Session> Players
@@ -32,15 +32,22 @@ namespace game_lib
             get => state;
             set { state = value; }
         }
+        public String Name
+        {
+            get => name;
+            set { name = value; }
+        }
 
 
         #endregion
 
-        public Game(uint playerLimit,ulong waitingTime)
+        public Game(uint playerLimit,ulong waitingTime, String name)
         {
             state = Game_state.LOADING_GAME;
             //start the lobby
             this.StartLobby(playerLimit, waitingTime);
+            this.Players = new List<Session>();
+            this.Name = name;
         }
 
         private void StartLobby(uint playerLimit, ulong waitingTime)
@@ -80,10 +87,24 @@ namespace game_lib
             if (this.State == Game.Game_state.IN_GAME || this.State == Game.Game_state.AFTER_GAME) { updateGame(deltaTime);}
         }
 
-     
+
+        public override String ToString()
+        {
+            return  "\n\rLobbyName: "+this.Name+ 
+                    "\n\rGameType: "+ getGameType()+ 
+                    "\n\rPlayers: " + getNumberOfPlayers()+"/"+this.lobby.PlayerLimit+ 
+                    "\n\rState: " + this.state.ToString(); 
+        }
+
+
+        private uint getNumberOfPlayers()
+        {
+            return (uint) this.Players.Count;
+        }
 
         public abstract void updateGame(ulong deltaTime);
         public abstract void StartGame();
         public abstract void StopGame();
+        public abstract String getGameType();
     }
 }

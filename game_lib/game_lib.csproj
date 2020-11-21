@@ -41,16 +41,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BMBGame.cs" />
+    <Compile Include="Game_Bomberman.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="Lobby.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\server_lib\server_lib.csproj">
-      <Project>{307aafbe-2971-4f3b-94f7-00ab9f767041}</Project>
-      <Name>server_lib</Name>
-    </ProjectReference>
+    <Compile Include="Session.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

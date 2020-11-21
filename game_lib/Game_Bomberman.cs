@@ -6,16 +6,22 @@ using System.Threading.Tasks;
 
 namespace game_lib
 {
-    class Game_Bomberman : Game
+    public class Game_Bomberman : Game
     {
         #region fields
         ushort[,] map;
+
         //SCORE
         #endregion
 
-        public Game_Bomberman(uint playerLimit, ulong waitingTime) : base(playerLimit, waitingTime)
+        public Game_Bomberman(uint playerLimit, ulong waitingTime,String name) : base(playerLimit, waitingTime,name)
         {
             map = new ushort[20, 20];
+        }
+
+        public override string getGameType()
+        {
+            return "BOMBERMAN";
         }
 
         public override void StartGame()

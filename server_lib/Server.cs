@@ -108,7 +108,7 @@ namespace server_lib
                     //create a new buffer for the client
                     buffers.Add(new byte[buffer_size]);
                     NetworkStream stream = tcpClient.GetStream();
-
+                    
                     TransmissionDataDelegate transmissionDelegate = new TransmissionDataDelegate(BeginDataTransmission);
                     transmissionDelegate.BeginInvoke(new Session(clientCounter, stream), TransmissionCallback, tcpClient);
                     clientCounter++;
@@ -134,7 +134,7 @@ namespace server_lib
                 //after user signed up, make him log in
                 communicator.LogIn(client);
                 //after sucesfull loging in, echo the client
-                communicator.Echo(client);
+                communicator.LetPlay(client);
             }
 
 
