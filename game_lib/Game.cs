@@ -17,8 +17,8 @@ namespace game_lib
         }
         public enum GameName
         {
-            BOMBERMAN
-
+            BOMBERMAN,
+            SOME_OTHER_GAME
         }
 
         private List<Session> players;

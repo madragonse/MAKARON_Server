@@ -83,7 +83,7 @@ namespace communication
             //choose lobby
             printCurrentLobbies(client, chosenGame);
 
-            sendToClient("\n\nChoose a lobby (b-go back/j- join lobby/c- create new/r-refresh)!)", client);
+            sendToClient("Choose a lobby (b-go back/j- join lobby/c- create new/r-refresh)!)", client);
             response = getClientsResponse(client);
             switch (response)
             {
@@ -142,6 +142,7 @@ namespace communication
             foreach (var v in values)
             {
                 sendToClient("\r\n"+i+". "+v.ToString() + "\n", client);
+                i++;
             }
         }
 
