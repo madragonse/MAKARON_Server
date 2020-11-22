@@ -68,35 +68,41 @@ namespace communication
         public void LetPlay(Session client)
         {
             client.Stream.ReadTimeout = 10000;
+            game_lib.Game.GameName chosenGame = game_lib.Game.GameName.BOMBERMAN;
 
-            //test games
-            GameManager.CreateGame(GameManager.GameName.BOMBERMAN,"TEST LOBBY FOR USER id="+client.Id);
-            //list all currgames
-            printCurrentGames(client);
+            //test game
+            GameManager.CreateGame(game_lib.Game.GameName.BOMBERMAN,"TEST LOBBY FOR USER id="+client.Id);
+          
 
-            sendToClient("\n\rCreate a new game or join an existing one! (j- join/c-create/l-list all)", client);
-            String response = "\r\n";
-            while (response == "\r\n")
-            {
-                response = getClientsResponse(client);
-            }
+            //choose game
+            sendToClient("\r\n\nChoose a game!", client);
+            printCurrentGameTypes(client);
+            String response = getClientsResponse(client);
+            Type enumType = chosenGame.GetType();
+            chosenGame = (game_lib.Game.GameName) Enum.Parse(enumType, response);
+            //choose lobby
+            printCurrentLobbies(client, chosenGame);
 
-
+            sendToClient("\n\nChoose a lobby (b-go back/j- join lobby/c- create new/r-refresh)!)", client);
+            response = getClientsResponse(client);
             switch (response)
             {
                 //join game
                 case "j":
-                    sendToClient("\n\rChoose game id: ", client);
-                    String r = getClientsResponse(client);
-                    if (GameManager.JoinGame(r, client))
+                    sendToClient("\n\rChoose lobby id: ", client);
+                    response = getClientsResponse(client);
+                    if (GameManager.JoinGame(response, client))
                     {
                         //do smth
                         sendToClient("\n\rLobby joined!", client);
                     }
                     break;
                 //create game
-                case "l":
-                    printCurrentGames(client);
+                case "r":
+                    printCurrentLobbies(client, chosenGame);
+                    break;
+                case "b":
+                    //do back stuff
                     break;
                 default: break;
             }
@@ -114,13 +120,28 @@ namespace communication
 
         }
 
-        private void printCurrentGames(Session client)
+        private void printCurrentLobbies(Session client, game_lib.Game.GameName name)
         { 
-            sendToClient("\n----CURRENT GAMES----", client);
+            sendToClient("\n----CURRENT LOBBIES----", client);
             List<Game> currGames = GameManager.GetAllGames();
             foreach (Game g in currGames)
             {
-                sendToClient(g.ToString()+"\n", client);
+                if (g.getGameType()==name)
+                {
+                    sendToClient(g.ToString() + "\n", client);
+                }
+               
+            }
+        }
+
+        private void printCurrentGameTypes(Session client)
+        {
+            sendToClient("\n----CURRENT GAMES----", client);
+            var values = Enum.GetValues(typeof(game_lib.Game.GameName));
+            int i = 0;
+            foreach (var v in values)
+            {
+                sendToClient("\r\n"+i+". "+v.ToString() + "\n", client);
             }
         }
 

@@ -9,18 +9,15 @@ namespace communication
 {
     public class GameManager
     {
-        public enum GameName
-        {
-            BOMBERMAN
-        }
+
 
         public static List<game_lib.Game> games= new List<game_lib.Game>();
 
-        public static void CreateGame(GameName name,String roomName)
+        public static void CreateGame(game_lib.Game.GameName name,String roomName)
         {
             switch (name)
             {
-                case GameName.BOMBERMAN:
+                case game_lib.Game.GameName.BOMBERMAN:
                     games.Add(new game_lib.Game_Bomberman(10,30,roomName));
                     break;
                 default: break;

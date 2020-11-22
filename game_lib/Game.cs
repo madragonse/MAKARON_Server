@@ -15,6 +15,11 @@ namespace game_lib
             IN_GAME,
             AFTER_GAME
         }
+        public enum GameName
+        {
+            BOMBERMAN
+
+        }
 
         private List<Session> players;
         private Game_state state;
@@ -107,6 +112,6 @@ namespace game_lib
         public abstract void updateGame(ulong deltaTime);
         public abstract void StartGame();
         public abstract void StopGame();
-        public abstract String getGameType();
+        public abstract GameName getGameType();
     }
 }

@@ -19,9 +19,9 @@ namespace game_lib
             map = new ushort[20, 20];
         }
 
-        public override string getGameType()
+        public override GameName getGameType()
         {
-            return "BOMBERMAN";
+            return GameName.BOMBERMAN;
         }
 
         public override void StartGame()
