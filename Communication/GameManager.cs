@@ -33,11 +33,10 @@ namespace communication
             return games;
         }
 
-        public static bool JoinGame(String gameId, game_lib.Session session)
+        public static bool JoinGame(int gameId, game_lib.Session session)
         {
-            int id=Int32.Parse(gameId);
-            if (id > games.Count) { return false; }
-            return games[id].AddPlayer(session);
+            if (gameId > games.Count) { return false; }
+            return games[gameId].AddPlayer(session);
         }
 
         public static void update(ulong deltaTime)

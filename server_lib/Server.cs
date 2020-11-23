@@ -135,10 +135,9 @@ namespace server_lib
                 if (choice == -1) { throw new Exception("BadPackage"); }
 
                 if (choice == 0) {communicators[client.Id].SignUp();}
-
                 //after user signed up, make him log in
                 communicators[client.Id].LogIn();
-                //after sucesfull loging in, echo the client
+                //after sucesfull loging in let the client play
                 communicators[client.Id].chooseGameAndLobby();
             }
 
@@ -154,7 +153,6 @@ namespace server_lib
                 //create global updating thread
                 GlobalUpdatingThread();
        
-
                 //start listening for clients
                 AcceptClient();
             }

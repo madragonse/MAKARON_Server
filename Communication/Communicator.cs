@@ -158,7 +158,6 @@ namespace communication
         #region game
         public void chooseGameAndLobby()
         {
-
             //add test lobby
             GameManager.CreateGame(game_lib.Game.GameName.BOMBERMAN, "TEST LOBBY FOR USER id="+session.Id);
 
@@ -173,22 +172,24 @@ namespace communication
                 if (package.packageType == "CHOICE")
                 {
                     int chosenGame = Int32.Parse(package.arguments[0]);
+                    SendCurrentLobbies(chosenGame);
                     while (package.packageType != "BACK")
                     {
-                        SendCurrentLobbies(chosenGame);
-                        package.SetTypeCHOICE_REQUEST("lobby choice");
-
-                        SendPackage(package);
                         package = ReceivePackage();
-                        if(package.packageType== "CHOICE")
+                        switch (package.packageType)
                         {
-                            GameManager.JoinGame(package.arguments[0], session);
-                            while (package.packageType != "QUIT_LOBBY" || package.packageType != "QUIT_GAME")
-                            {
-                                PlayGame();  
-                            }
+                            case "CREATE_LOBBY":
+                                game_lib.Game.GameName game = (game_lib.Game.GameName ) Enum.Parse(typeof(game_lib.Game.GameName), package.arguments[0]);
+                                GameManager.CreateGame(game, package.arguments[1]);
+                                break;
+                            case "JOIN_LOBBY":
+                                GameManager.JoinGame(Int32.Parse(package.arguments[0]), session);
+                                while (package.packageType != "QUIT_LOBBY" || package.packageType != "QUIT_GAME")
+                                {
+                                    PlayGame();
+                                }
+                                break;
                         }
-                       
                     }
                 }
             }

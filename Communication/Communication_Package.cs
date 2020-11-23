@@ -200,6 +200,14 @@ namespace communication
             this.dataString += "<type>BACK</type>";
             this.dataString += "</PACKAGE>";
         }
+      public void SetTypeCREATE_LOBBY(String gameType,String lobbyName)
+        {
+            this.dataString = "<PACKAGE>";
+            this.dataString += "<type>CREATE_GAME</type>";
+            this.dataString += "<arg1>"+gameType+"</arg1>";
+            this.dataString += "<arg2>" + lobbyName + "</arg2>";
+            this.dataString += "</PACKAGE>";
+        }
 
         public void refreshByteArray()
         {
