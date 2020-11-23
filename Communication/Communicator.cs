@@ -12,6 +12,7 @@ namespace communication
     {
         private Session session;
         private byte[] buffer;
+        private Communication_Package package;
         public Session Session { get => session; set => session = value; }
         public byte[] Buffer { get => buffer; set => buffer = value; }
 
@@ -19,131 +20,105 @@ namespace communication
         {
             this.session = s;
             this.buffer = new byte[1024];
+            package = new Communication_Package();
         }
 
 
-        private void sendToClient(String m, Session client)
+    
+        private Communication_Package ReceivePackage()
         {
-            byte[] message = Encoding.ASCII.GetBytes(m);
-            client.Stream.Write(message, 0, message.Length);
+            session.Stream.Read(Buffer, 0, Buffer.Length);
+            Communication_Package package= new Communication_Package(Buffer);
+            package.Interpet();
+            return package;
         }
 
-        private String getClientsResponse(Session client)
+        private void SendPackage(Communication_Package package)
         {
-            int messageLength = 0;
-            String response = "\r\n";
-            while (response == "\r\n")
+            package.refreshByteArray();
+            session.Stream.Write(package.data, 0, package.data.Length);
+        }
+
+
+        public int logInOrSignUp()
+        {
+            //send choiceRequest
+            package.SetTypeCHOICE_REQUEST("(0-login/1-signup");
+            SendPackage(package);
+
+            //receive anwser
+            package = ReceivePackage();
+            if(package.packageType== "CHOOSE")
             {
-                messageLength = client.Stream.Read(Buffer, 0, Buffer.Length);
-                response = Encoding.UTF8.GetString(Buffer, 0, messageLength);
+                return Int32.Parse(package.arguments[0]);
             }
-
-            return response;
+            return -1;
         }
 
-        /// <summary>
-        /// Greets given user and allows him to choose whether to log in or sign up.
-        /// Returns "s" if user chooses to sign up, and other strings for log in.
-        /// </summary>
-        /// <param  Client structure="client"></param>
-        /// <returns>Returns s if user chooses to sign up, and other strings for log in.</returns>
-        public String greetAndChooseOption()
+        public void LetPlay()
         {
-            int messageLenght = 0;
 
-            sendToClient("\nWelcome to the server! Log in or Sign up (s-sign up/anything else-log in)", this.session);
-           
-            //wait for the response    
-            messageLenght = session.Stream.Read(Buffer, 0, Buffer.Length);
-            return Encoding.UTF8.GetString(Buffer, 0, messageLenght);
-        }
+            //add test lobby
+            GameManager.CreateGame(game_lib.Game.GameName.BOMBERMAN, "TEST LOBBY FOR USER id="+client.Id);
 
-
-
-        /// <summary>
-        /// Puts given Client in echo state, whatever he writes is repeated back to him.
-        /// If the client doesn't respond for 10 seconds, he timesout.
-        /// </summary>
-        /// <param Client structure="client"></param>
-        public void LetPlay(Session client)
-        {
-            client.Stream.ReadTimeout = 10000;
-            game_lib.Game.GameName chosenGame = game_lib.Game.GameName.BOMBERMAN;
-
-            //test game
-            GameManager.CreateGame(game_lib.Game.GameName.BOMBERMAN,"TEST LOBBY FOR USER id="+client.Id);
-          
-
-            //choose game
-            sendToClient("\r\n\nChoose a game!", client);
-            printCurrentGameTypes(client);
-            String response = getClientsResponse(client);
-            Type enumType = chosenGame.GetType();
-            chosenGame = (game_lib.Game.GameName) Enum.Parse(enumType, response);
-            //choose lobby
-            printCurrentLobbies(client, chosenGame);
-
-            sendToClient("Choose a lobby (b-go back/j- join lobby/c- create new/r-refresh)!)", client);
-            response = getClientsResponse(client);
-            switch (response)
+            //send the player currentGameTypes
+            SendCurrentGameTypes();
+            while (package.packageType != "QUIT_SERVER")
             {
-                //join game
-                case "j":
-                    sendToClient("\n\rChoose lobby id: ", client);
-                    response = getClientsResponse(client);
-                    if (GameManager.JoinGame(response, client))
-                    {
-                        //do smth
-                        sendToClient("\n\rLobby joined!", client);
-                    }
-                    break;
-                //create game
-                case "r":
-                    printCurrentLobbies(client, chosenGame);
-                    break;
-                case "b":
-                    //do back stuff
-                    break;
-                default: break;
-            }
-
-            //echo loop
-            while (true)
-            {
-                try
+                //let client choose game
+                package.SetTypeCHOICE_REQUEST("game choice");
+                SendPackage(package);
+                package = ReceivePackage();
+                if (package.packageType == "CHOICE")
                 {
-                    int messageLenght = client.Stream.Read(Buffer, 0, Buffer.Length);
-                    client.Stream.Write(Buffer, 0, messageLenght);
-                }
-                catch (System.IO.IOException) { Console.Write("\rClient " + client.Id + " has disconected!"); break; }
-            }
+                    int chosenGame = Int32.Parse(package.arguments[0]);
+                    while (package.packageType != "BACK")
+                    {
+                        SendCurrentLobbies(chosenGame);
+                        package.SetTypeCHOICE_REQUEST("lobby choice");
 
+                        SendPackage(package);
+                        package = ReceivePackage();
+                        if(package.packageType== "CHOICE")
+                        {
+                            GameManager.JoinGame(package.arguments[0], session);
+                            while (package.packageType != "QUIT_LOBBY")
+                            {
+                                //doGameStuffHere
+                            }
+                        }
+                       
+                    }
+                }
+            }
+           
         }
 
-        private void printCurrentLobbies(Session client, game_lib.Game.GameName name)
-        { 
-            sendToClient("\n----CURRENT LOBBIES----", client);
+        private void SendCurrentLobbies(int gameId)
+        {
+            List<String> data= new List<string>();
             List<Game> currGames = GameManager.GetAllGames();
             foreach (Game g in currGames)
             {
-                if (g.getGameType()==name)
+                if ((int) g.getGameType()==gameId)
                 {
-                    sendToClient(g.ToString() + "\n", client);
+                   data.Add(g.ToString());
                 }
-               
             }
+            package.SetTypeLIST(data);
+            SendPackage(package);
         }
 
-        private void printCurrentGameTypes(Session client)
+        private void SendCurrentGameTypes()
         {
-            sendToClient("\n----CURRENT GAMES----", client);
+            List<String> data = new List<string>();
             var values = Enum.GetValues(typeof(game_lib.Game.GameName));
-            int i = 0;
             foreach (var v in values)
             {
-                sendToClient("\r\n"+i+". "+v.ToString() + "\n", client);
-                i++;
+                data.Add(v.ToString());
             }
+            package.SetTypeLIST(data);
+            SendPackage(package);
         }
 
 
@@ -151,132 +126,100 @@ namespace communication
         /// Allows user to log into an existing account.
         /// </summary>
         /// <param  Client structure="client"></param>
-        public void LogIn(Session client)
+        public void LogIn()
         {
             Authentication auth = new Authentication();
-            int messageLenght = 0;
-            byte[] message;
-            String username = "\r\n";
-            String password = "\r\n";
+            String username = "";
+            String password = "";
 
 
-            message = Encoding.ASCII.GetBytes("\r\nUsername: ");
-            client.Stream.Write(message, 0, message.Length);
-            //in order to avoid \r\n randomly sent by Putty being taken as an input
-            while (username == "\r\n")
-            {
-                messageLenght = client.Stream.Read(Buffer, 0, Buffer.Length);
-                username = Encoding.UTF8.GetString(Buffer, 0, messageLenght);
-            }
+            //send request for login information
+            package.SetTypeLOGIN_REQUEST();
+            SendPackage(package);
 
-            message = Encoding.ASCII.GetBytes("\rPassword: ");
-            client.Stream.Write(message, 0, message.Length);
-            //in order to avoid \r\n randomly sent by Putty being taken as an input
-            while (password == "\r\n")
+            //receive anwser
+            package = ReceivePackage();
+            if (package.packageType == "LOGIN")
             {
-                messageLenght = client.Stream.Read(Buffer, 0, Buffer.Length);
-                password = Encoding.UTF8.GetString(Buffer, 0, messageLenght); 
-            }
-
-            try
-            {
-                auth.AuthorizeUser(username, password);
-                Console.WriteLine("\nA user loged in [username:" + username + "]");
-                message = Encoding.ASCII.GetBytes("\n\rLog in succesfull!");
-                client.Stream.Write(message, 0, message.Length);
-            }
-            catch (AuthenticationException e)
-            {
-                if (e.ErrorCategory == -1)
+                try
                 {
-                    message = Encoding.ASCII.GetBytes("Server malfunction: " + e);
-                    client.Stream.Write(message, 0, message.Length);
-                    return;
+                    username = package.arguments[0];
+                    password = package.arguments[1];
+                    auth.AuthorizeUser(username, password);
+                    Console.WriteLine("\nA user loged in [username:" + username + "]");
+
+                    package.SetTypeLOGIN_CONFIRM(username);
+                    SendPackage(package);
                 }
-                if (e.ErrorCategory == 1)
+                catch (AuthenticationException e)
                 {
-                    message = Encoding.ASCII.GetBytes("Error: " + e);
-                    client.Stream.Write(message, 0, message.Length);
-                    message = Encoding.ASCII.GetBytes("\n\r--Try again!--\n\r");
-                    client.Stream.Write(message, 0, message.Length);
-                    LogIn(client);
+                    if (e.ErrorCategory == -1)
+                    {
+                        package.SetTypeERROR("Server malfunction: " + e);
+                        SendPackage(package);
+                        return;
+                    }
+                    if (e.ErrorCategory == 1)
+                    {
+                        package.SetTypeLOGIN_REFUSE(username,e.ToString());
+                        SendPackage(package);
+                        LogIn();
+                    }
                 }
             }
+
+            
         }
 
         /// <summary>
         /// Allows user to create a new account.
         /// </summary>
         /// <param  Client structure="client"></param>
-        public void SignUp(Session client)
+        public void SignUp()
         {
             Authentication auth = new Authentication();
-            int messageLenght = 0;
-            String password = "\r\n";
-            String confpassword = "\r\n";
-            String username = "\r\n";
+            String password = "";
+            String confpassword = "";
+            String username = "";
 
-            byte[] message = Encoding.ASCII.GetBytes("\rUsername (max 10 chars): ");
-            client.Stream.Write(message, 0, message.Length);
-            //in order to avoid \r\n randomly sent by Putty being taken as an input
-            while (username == "\r\n")
+            //send request for signup information
+            package.SetTypeSIGNUP_REQUEST();
+            SendPackage(package);
+
+            //receive anwser
+            package = ReceivePackage();
+            if (package.packageType == "SIGNUP")
             {
-                messageLenght = client.Stream.Read(Buffer, 0, Buffer.Length);
-                username = Encoding.UTF8.GetString(Buffer, 0, messageLenght);
-            }
+                username = package.arguments[0];
+                password = package.arguments[1];
+                confpassword = package.arguments[2];
 
-
-            message = Encoding.ASCII.GetBytes("\rPassword (one upercase Letter and number required): ");
-            client.Stream.Write(message, 0, message.Length);
-            //in order to avoid \r\n randomly sent by Putty being taken as an input
-            while (password == "\r\n")
-            {
-                messageLenght = client.Stream.Read(Buffer, 0, Buffer.Length);
-                password = Encoding.UTF8.GetString(Buffer, 0, messageLenght); ;
-            }
-
-            message = Encoding.ASCII.GetBytes("\rConfirm Password: ");
-            client.Stream.Write(message, 0, message.Length);
-            //in order to avoid \r\n randomly sent by Putty being taken as an input
-            while (confpassword == "\r\n")
-            {
-                messageLenght = client.Stream.Read(Buffer, 0, Buffer.Length);
-                confpassword = Encoding.UTF8.GetString(Buffer, 0, messageLenght); ;
-            }
-
-            //Check if the two passwords are the same
-            if (password != confpassword)
-            {
-                message = Encoding.ASCII.GetBytes("\r\nError: Passwords don't match!");
-                client.Stream.Write(message, 0, message.Length);
-                SignUp(client);
-            }
-
-
-            try
-            {
-                auth.CreateUser(username, password);
-                Console.WriteLine("\nNew account created [user:" + username + " password: " + password + "]");
-                message = Encoding.ASCII.GetBytes("\n\rAccount created succesfully!");
-                client.Stream.Write(message, 0, message.Length);
-            }
-            catch (AuthenticationException e)
-            {
-                if (e.ErrorCategory == -1)
+                try
                 {
-                    message = Encoding.ASCII.GetBytes("Server malfunction: " + e);
-                    client.Stream.Write(message, 0, message.Length);
-                    return;
+                    auth.CreateUser(username, password);
+                    Console.WriteLine("\nNew account created [user:" + username + " password: " + password + "]");
+                    package.SetTypeSIGNUP_CONFIRM(username);
+                    SendPackage(package);
                 }
-                if (e.ErrorCategory == 1)
+                catch (AuthenticationException e)
                 {
-                    message = Encoding.ASCII.GetBytes("Error: " + e);
-                    client.Stream.Write(message, 0, message.Length);
-                    message = Encoding.ASCII.GetBytes("\n\r--Try again!--\n\r");
-                    client.Stream.Write(message, 0, message.Length);
-                    SignUp(client);
+                    if (e.ErrorCategory == -1)
+                    {
+                        package.SetTypeERROR("Server malfunction: " + e);
+                        SendPackage(package);
+                        return;
+                    }
+                    if (e.ErrorCategory == 1)
+                    {
+                        package.SetTypeSIGNUP_REFUSE(username, e.ToString());
+                        SendPackage(package);
+                        SignUp();
+                    }
                 }
             }
+
+
+           
         }
     
 

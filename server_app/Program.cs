@@ -17,7 +17,7 @@ namespace server_app
             Server server = new Server(adresIP, port);
 
            
-
+            
 
             server.Start();
         }

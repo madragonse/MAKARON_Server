@@ -25,15 +25,15 @@ namespace server_lib
             #endregion
 
             #region field_definitions
-            public IPAddress IPAddress
-            {
-                get => ipAddress;
-                set
+                public IPAddress IPAddress
                 {
-                    if (!running) ipAddress = value;
-                    else throw new Exception("The server is not curently running");
+                    get => ipAddress;
+                    set
+                    {
+                        if (!running) ipAddress = value;
+                        else throw new Exception("The server is not curently running");
+                    }
                 }
-            }
 
             public int Port
             {
@@ -131,13 +131,15 @@ namespace server_lib
             protected void BeginDataTransmission(game_lib.Session client)
             {
 
-                String bufferString = communicators[client.Id].greetAndChooseOption();
+                int choice = communicators[client.Id].logInOrSignUp();
+                if (choice == -1) { throw new Exception("BadPackage"); }
 
-                if (bufferString == "s") { communicators[client.Id].SignUp(client); }
+                if (choice == 0) {communicators[client.Id].SignUp();}
+
                 //after user signed up, make him log in
-                communicators[client.Id].LogIn(client);
+                communicators[client.Id].LogIn();
                 //after sucesfull loging in, echo the client
-                communicators[client.Id].LetPlay(client);
+                communicators[client.Id].LetPlay();
             }
 
 
