@@ -208,6 +208,13 @@ namespace communication
             this.dataString += "<arg2>" + lobbyName + "</arg2>";
             this.dataString += "</PACKAGE>";
         }
+        public void SetTypeJOIN_LOBBY(String lobbyId)
+        {
+            this.dataString = "<PACKAGE>";
+            this.dataString += "<type>JOIN_LOBBY</type>";
+            this.dataString += "<arg1>" + lobbyId + "</arg1>";
+            this.dataString += "</PACKAGE>";
+        }
 
         public void refreshByteArray()
         {
