@@ -139,7 +139,7 @@ namespace server_lib
                 //after user signed up, make him log in
                 communicators[client.Id].LogIn();
                 //after sucesfull loging in, echo the client
-                communicators[client.Id].LetPlay();
+                communicators[client.Id].chooseGameAndLobby();
             }
 
 

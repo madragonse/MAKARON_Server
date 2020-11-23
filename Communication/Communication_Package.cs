@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace communication
 {
-    class Communication_Package
+    public class Communication_Package
     {
         public String dataString;
         public byte[] data;

@@ -23,8 +23,7 @@ namespace communication
             package = new Communication_Package();
         }
 
-
-    
+        #region packages
         private Communication_Package ReceivePackage()
         {
             session.Stream.Read(Buffer, 0, Buffer.Length);
@@ -39,7 +38,9 @@ namespace communication
             session.Stream.Write(package.data, 0, package.data.Length);
         }
 
+        #endregion
 
+        #region 
         public int logInOrSignUp()
         {
             //send choiceRequest
@@ -48,77 +49,11 @@ namespace communication
 
             //receive anwser
             package = ReceivePackage();
-            if(package.packageType== "CHOOSE")
+            if (package.packageType == "CHOOSE")
             {
                 return Int32.Parse(package.arguments[0]);
             }
             return -1;
-        }
-
-        public void LetPlay()
-        {
-
-            //add test lobby
-            GameManager.CreateGame(game_lib.Game.GameName.BOMBERMAN, "TEST LOBBY FOR USER id="+session.Id);
-
-            //send the player currentGameTypes
-            SendCurrentGameTypes();
-            while (package.packageType != "QUIT_SERVER")
-            {
-                //let client choose game
-                package.SetTypeCHOICE_REQUEST("game choice");
-                SendPackage(package);
-                package = ReceivePackage();
-                if (package.packageType == "CHOICE")
-                {
-                    int chosenGame = Int32.Parse(package.arguments[0]);
-                    while (package.packageType != "BACK")
-                    {
-                        SendCurrentLobbies(chosenGame);
-                        package.SetTypeCHOICE_REQUEST("lobby choice");
-
-                        SendPackage(package);
-                        package = ReceivePackage();
-                        if(package.packageType== "CHOICE")
-                        {
-                            GameManager.JoinGame(package.arguments[0], session);
-                            while (package.packageType != "QUIT_LOBBY")
-                            {
-                                //doGameStuffHere
-                            }
-                        }
-                       
-                    }
-                }
-            }
-           
-        }
-
-        private void SendCurrentLobbies(int gameId)
-        {
-            List<String> data= new List<string>();
-            List<Game> currGames = GameManager.GetAllGames();
-            foreach (Game g in currGames)
-            {
-                if ((int) g.getGameType()==gameId)
-                {
-                   data.Add(g.ToString());
-                }
-            }
-            package.SetTypeLIST(data);
-            SendPackage(package);
-        }
-
-        private void SendCurrentGameTypes()
-        {
-            List<String> data = new List<string>();
-            var values = Enum.GetValues(typeof(game_lib.Game.GameName));
-            foreach (var v in values)
-            {
-                data.Add(v.ToString());
-            }
-            package.SetTypeLIST(data);
-            SendPackage(package);
         }
 
 
@@ -161,14 +96,14 @@ namespace communication
                     }
                     if (e.ErrorCategory == 1)
                     {
-                        package.SetTypeLOGIN_REFUSE(username,e.ToString());
+                        package.SetTypeLOGIN_REFUSE(username, e.ToString());
                         SendPackage(package);
                         LogIn();
                     }
                 }
             }
 
-            
+
         }
 
         /// <summary>
@@ -217,12 +152,82 @@ namespace communication
                     }
                 }
             }
+        }
+        #endregion
 
+        #region game
+        public void chooseGameAndLobby()
+        {
 
+            //add test lobby
+            GameManager.CreateGame(game_lib.Game.GameName.BOMBERMAN, "TEST LOBBY FOR USER id="+session.Id);
+
+            //send the player currentGameTypes
+            SendCurrentGameTypes();
+            while (package.packageType != "QUIT_SERVER")
+            {
+                //let client choose game
+                package.SetTypeCHOICE_REQUEST("game choice");
+                SendPackage(package);
+                package = ReceivePackage();
+                if (package.packageType == "CHOICE")
+                {
+                    int chosenGame = Int32.Parse(package.arguments[0]);
+                    while (package.packageType != "BACK")
+                    {
+                        SendCurrentLobbies(chosenGame);
+                        package.SetTypeCHOICE_REQUEST("lobby choice");
+
+                        SendPackage(package);
+                        package = ReceivePackage();
+                        if(package.packageType== "CHOICE")
+                        {
+                            GameManager.JoinGame(package.arguments[0], session);
+                            while (package.packageType != "QUIT_LOBBY" || package.packageType != "QUIT_GAME")
+                            {
+                                PlayGame();  
+                            }
+                        }
+                       
+                    }
+                }
+            }
            
         }
-    
 
+        private void PlayGame()
+        {
+            //doGameStuffHere
+        }
+
+
+        private void SendCurrentLobbies(int gameId)
+        {
+            List<String> data = new List<string>();
+            List<Game> currGames = GameManager.GetAllGames();
+            foreach (Game g in currGames)
+            {
+                if ((int)g.getGameType() == gameId)
+                {
+                    data.Add(g.ToString());
+                }
+            }
+            package.SetTypeLIST(data);
+            SendPackage(package);
+        }
+
+        private void SendCurrentGameTypes()
+        {
+            List<String> data = new List<string>();
+            var values = Enum.GetValues(typeof(game_lib.Game.GameName));
+            foreach (var v in values)
+            {
+                data.Add(v.ToString());
+            }
+            package.SetTypeLIST(data);
+            SendPackage(package);
+        }
+        #endregion
     }
 }
 
