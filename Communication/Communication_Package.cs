@@ -29,62 +29,86 @@ namespace communication
         #region noargs
         public void SetTypePING()
         {
-            this.dataString = "<type>PING</type>";
+            this.dataString = "<PACKAGE>";
+            this.dataString += "<type>PING</type>";
+            this.dataString += "</PACKAGE>";
         }
  
 
         public void SetTypeQUIT_SERVER()
         {
-            this.dataString = "<type>QUIT_SERVER</type>";
+            this.dataString = "<PACKAGE>";
+            this.dataString += "<type>QUIT_SERVER</type>";
+            this.dataString += "</PACKAGE>";
         }
 
         public void SetTypeQUIT_LOBBY()
         {
-            this.dataString = "<type>QUIT_LOBBY</type>";
+            this.dataString = "<PACKAGE>";
+            this.dataString += "<type>QUIT_LOBBY</type>";
+            this.dataString += "</PACKAGE>";
         }
 
         public void SetTypeQUIT_GAME()
         {
-            this.dataString = "<type>QUIT_GAME</type>";
+            this.dataString = "<PACKAGE>";
+            this.dataString += "<type>QUIT_GAME</type>";
+            this.dataString += "</PACKAGE>";
         }
         #endregion
         #region multipleargs
         public void SetTypeCHOOSE(int id)
         {
-            this.dataString = "<type>CHOOSE</type><arg1>" + id.ToString() + "</arg1>";
+            this.dataString = "<PACKAGE>";
+            this.dataString += "<type>CHOOSE</type><arg1>" + id.ToString() + "</arg1>";
+            this.dataString += "</PACKAGE>";
         }
 
         public void SetTypeLOGIN(String username, String password)
         {
-            this.dataString = "<type>LOGIN</type><arg1>" + username + "</arg1><arg2>" + password + "</arg2>";
+            this.dataString = "<PACKAGE>";
+            this.dataString += "<type>LOGIN</type><arg1>" + username + "</arg1><arg2>" + password + "</arg2>";
+            this.dataString += "</PACKAGE>";
         }
 
         public void SetTypeLOGIN_CONFIRM(String username)
         {
-            this.dataString = "<type>LOGIN_CONFIRM</type><arg1>" + username + "</arg1>";
+            this.dataString = "<PACKAGE>";
+            this.dataString += "<type>LOGIN_CONFIRM</type><arg1>" + username + "</arg1>";
+            this.dataString += "</PACKAGE>";
         }
 
         public void SetTypeLOGIN_REFUSE(String username, String reason)
         {
-            this.dataString = "<type>LOGIN_REFUSE</type><arg1>" + username + "</arg1><arg2>" + reason + "</arg2>";
+            this.dataString = "<PACKAGE>";
+            this.dataString += "<type>LOGIN_REFUSE</type><arg1>" + username + "</arg1><arg2>" + reason + "</arg2>";
+            this.dataString += "</PACKAGE>";
         }
 
         public void SetTypeSIGNUP(String username, String password, String confirmPassword)
         {
-            this.dataString = "<type>SIGNUP</type><arg1>" + username + "</arg1><arg2>" + password + "</arg2><arg3>" + confirmPassword + "</arg3>";
+            this.dataString = "<PACKAGE>";
+            this.dataString += "<type>SIGNUP</type><arg1>" + username + "</arg1><arg2>" + password + "</arg2><arg3>" + confirmPassword + "</arg3>";
+            this.dataString += "</PACKAGE>";
         }
 
         public void SetTypeSIGNUP_CONFIRM(String username)
         {
-            this.dataString = "<type>SIGNUP_CONFIRM</type><arg1>" + username + "</arg1>";
+            this.dataString = "<PACKAGE>";
+            this.dataString += "<type>SIGNUP_CONFIRM</type><arg1>" + username + "</arg1>";
+            this.dataString += "</PACKAGE>";
         }
         public void SetTypeSIGNUP_REFUSE(String username, String reason)
         {
-            this.dataString = "<type>SIGNUP_REFUSE</type><arg1>" + username + "</arg1><arg2>" + reason + "</arg2>";
+            this.dataString = "<PACKAGE>";
+            this.dataString += "<type>SIGNUP_REFUSE</type><arg1>" + username + "</arg1><arg2>" + reason + "</arg2>";
+            this.dataString += "</PACKAGE>";
         }
         public void SetTypeGLOBAL_MESSAGE(int senderId, String senderUsername, String message)
         {
-            this.dataString = "<type>GLOBAL_MESSAGE</type><arg1>" + senderId.ToString() + "</arg1><arg2>" + senderUsername + "</arg2><arg3>" + message + "</arg3>";
+            this.dataString = "<PACKAGE>";
+            this.dataString += "<type>GLOBAL_MESSAGE</type><arg1>" + senderId.ToString() + "</arg1><arg2>" + senderUsername + "</arg2><arg3>" + message + "</arg3>";
+            this.dataString += "</PACKAGE>";
         }
         #endregion
         public byte[] ToByteArray()
@@ -133,36 +157,48 @@ namespace communication
 
         public void SetTypeLOGIN_REQUEST()
         {
-            this.dataString = "<type>LOGIN_REQUEST</type>";
+            this.dataString = "<PACKAGE>";
+            this.dataString += "<type>LOGIN_REQUEST</type>";
+            this.dataString = "</PACKAGE>";
         }
         public void SetTypeSIGNUP_REQUEST()
         {
-            this.dataString = "<type>SIGNUP_REQUEST</type>";
+            this.dataString = "<PACKAGE>";
+            this.dataString += "<type>SIGNUP_REQUEST</type>";
+            this.dataString += "</PACKAGE>";
         }
 
         public void SetTypeERROR(String message)
         {
-            this.dataString = "<type>ERROR</type><arg1>"+message+"</arg1>";
+            this.dataString = "<PACKAGE>";
+            this.dataString += "<type>ERROR</type><arg1>"+message+"</arg1>";
+            this.dataString += "</PACKAGE>";
         }
 
         public void SetTypeCHOICE_REQUEST(String whatIsRequested)
         {
-            this.dataString = "<type>CHOICE_REQUEST</type><arg1>"+whatIsRequested+"</arg1>";
+            this.dataString = "<PACKAGE>";
+            this.dataString += "<type>CHOICE_REQUEST</type><arg1>"+whatIsRequested+"</arg1>";
+            this.dataString += "</PACKAGE>";
         }
 
         public void SetTypeLIST(List<String> list)
         {
-            this.dataString = "<type>LIST</type>";
+            this.dataString = "<PACKAGE>";
+            this.dataString += "<type>LIST</type>";
             int i = 1;
             foreach(String s in list)
             {
                 this.dataString += "<arg" + i + ">" + s + "</arg" + i + ">";
             }
+            this.dataString += "</PACKAGE>";
         }
 
         public void SetTypeBack()
         {
-            this.dataString = "<type>BACK</type>";
+            this.dataString = "<PACKAGE>";
+            this.dataString += "<type>BACK</type>";
+            this.dataString += "</PACKAGE>";
         }
 
         public void refreshByteArray()

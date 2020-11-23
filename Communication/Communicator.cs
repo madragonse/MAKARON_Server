@@ -59,7 +59,7 @@ namespace communication
         {
 
             //add test lobby
-            GameManager.CreateGame(game_lib.Game.GameName.BOMBERMAN, "TEST LOBBY FOR USER id="+client.Id);
+            GameManager.CreateGame(game_lib.Game.GameName.BOMBERMAN, "TEST LOBBY FOR USER id="+session.Id);
 
             //send the player currentGameTypes
             SendCurrentGameTypes();
