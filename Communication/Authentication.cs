@@ -38,10 +38,9 @@ namespace communication
             if (checkIfUserExists(username)) { throw new AuthenticationException("User already exists", 1); }
 
             //hash the password before inserting it into the database
-            String hashedPassword = ComputeSha256Hash(pass);
 
             //insert user into database
-            database.Query = "Insert into users (username,password) values(\"" + username + "\",\"" + hashedPassword + "\")";
+            database.Query = "Insert into users (username,password) values(\"" + username + "\",\"" + pass + "\")";
             database.Command = new MySqlCommand(database.Query, database.Connection);
             database.Adapter.InsertCommand = database.Command;
             database.Adapter.InsertCommand.ExecuteNonQuery();
@@ -66,8 +65,7 @@ namespace communication
             try { database.ConnectToDatabase(); }
             catch (Exception) { throw new AuthenticationException("Database Error", -1); }
 
-            //hash the password for safety reasons
-            String hashedPassword = ComputeSha256Hash(pass);
+
 
             //selects the of a record with given username
             database.Query = "SELECT password FROM users WHERE username= \"" + username + "\"";
@@ -80,7 +78,7 @@ namespace communication
             database.DataReader.Close();
 
             if (retrivedPassword == "") { throw new AuthenticationException("User not found", 1); }
-            if (retrivedPassword == hashedPassword) { return true; }
+            if (retrivedPassword == pass) { return true; }
             throw new AuthenticationException("Invalid password", 1);
         }
 
@@ -108,17 +106,7 @@ namespace communication
             }
             if (spaceFlag) { throw new AuthenticationException("Username cannot contain whitespaces", 1); }
 
-            bool upperLetterFlag = false;
-            bool numberFlag = false;
-            //contains at least one number and at least one uppercase letter
-            foreach (char c in pass)
-            {
-                if (c > 64 && c < 91) { upperLetterFlag = true; }
-                if (c > 47 && c < 57) { numberFlag = true; }
-            }
-
-            if (!upperLetterFlag) { throw new AuthenticationException("Pasword must contain at least one upper case letter", 1); }
-            if (!numberFlag) { throw new AuthenticationException("Pasword must contain at least one number", 1); }
+        
         }
 
         /// <summary>

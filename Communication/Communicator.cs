@@ -10,9 +10,20 @@ namespace communication
 {
     public class Communicator
     {
+
+        public enum COMMUNICATION_STATE
+        {
+           LOGIN_SIGNUP,
+           GAME_LOBBY,
+           PLAYING
+        }
         private Session session;
         private byte[] buffer;
         private Communication_Package package;
+        private List<String> packageArguments;
+
+        private COMMUNICATION_STATE state;
+
         public Session Session { get => session; set => session = value; }
         public byte[] Buffer { get => buffer; set => buffer = value; }
 
@@ -26,37 +37,68 @@ namespace communication
         #region packages
         private Communication_Package ReceivePackage()
         {
-            session.Stream.Read(Buffer, 0, Buffer.Length);
-            Communication_Package package= new Communication_Package(Buffer);
-            package.Interpet();
+            Array.Clear(Buffer, 0, Buffer.Length);
+            Session.Stream.Read(Buffer, 0, Buffer.Length);
+            Communication_Package package = new Communication_Package(Buffer);
+            //get arguments
+            this.packageArguments = package.getArguments();
+            //write to console for debbugging purposes
+            Console.Write("\nRECEIVED: "+package.XML);
             return package;
         }
 
         private void SendPackage(Communication_Package package)
         {
-            package.refreshByteArray();
-            session.Stream.Write(package.data, 0, package.data.Length);
+            if (this.Session.Stream != null)
+            {
+                byte[] data = package.ToByteArray();
+                Session.Stream.Write(data, 0, data.Length);
+            }
         }
 
         #endregion
 
-        #region 
-        public int logInOrSignUp()
-        {
-            //send choiceRequest
-            package.SetTypeCHOICE_REQUEST("(0-login/1-signup");
-            SendPackage(package);
 
-            //receive anwser
-            package = ReceivePackage();
-            if (package.packageType == "CHOOSE")
+        public void BeginCommunication()
+        {
+            String packageType = "";
+            this.state = COMMUNICATION_STATE.LOGIN_SIGNUP;
+            while (true)
             {
-                return Int32.Parse(package.arguments[0]);
+                package = ReceivePackage();
+                packageType = packageArguments[0];
+                if (this.state== COMMUNICATION_STATE.LOGIN_SIGNUP)
+                {
+                    if (packageType == "SIGNUP") { SignUp(); }
+                    if (packageType == "LOGIN") { LogIn(); }
+                    if (packageType == "REQUEST_GAME_LIST")
+                    {
+                        SendCurrentGameTypes();
+                        this.state = COMMUNICATION_STATE.GAME_LOBBY;
+                    }
+                }
+                if (this.state == COMMUNICATION_STATE.GAME_LOBBY)
+                {
+                    if(packageType == "REQUEST_LOBBY_LIST")
+                    {
+                        SendCurrentLobbies(Int32.Parse(packageArguments[1]));
+                    }
+                    if (packageType == "CREATE_LOBBY") {
+                        game_lib.Game.GameName game = (game_lib.Game.GameName)Enum.Parse(typeof(game_lib.Game.GameName), packageArguments[2]);
+                        GameManager.CreateGame(game, packageArguments[1]);
+                    }
+                    if(packageType== "JOIN_LOBBY")
+                    {
+                        GameManager.JoinGame(Int32.Parse(packageArguments[1]), session);
+                        this.PlayGame();
+                    }
+                }
+
             }
-            return -1;
+
         }
 
-
+        #region authentication
         /// <summary>
         /// Allows user to log into an existing account.
         /// </summary>
@@ -67,43 +109,30 @@ namespace communication
             String username = "";
             String password = "";
 
-
-            //send request for login information
-            package.SetTypeLOGIN_REQUEST();
-            SendPackage(package);
-
-            //receive anwser
-            package = ReceivePackage();
-            if (package.packageType == "LOGIN")
+            try
             {
-                try
-                {
-                    username = package.arguments[0];
-                    password = package.arguments[1];
-                    auth.AuthorizeUser(username, password);
-                    Console.WriteLine("\nA user loged in [username:" + username + "]");
+                username = packageArguments[1];
+                password = packageArguments[2];
+                auth.AuthorizeUser(username, password);
+                Console.WriteLine("\nA user loged in [username:" + username + "]");
 
-                    package.SetTypeLOGIN_CONFIRM(username);
+                package.SetTypeLOGIN_CONFIRM(username);
+                SendPackage(package);
+            }
+            catch (AuthenticationException e)
+            {
+                if (e.ErrorCategory == -1)
+                {
+                    package.SetTypeERROR("Server malfunction: " + e);
+                    SendPackage(package);
+                    return;
+                }
+                if (e.ErrorCategory == 1)
+                {
+                    package.SetTypeLOGIN_REFUSE(username, e.ToString());
                     SendPackage(package);
                 }
-                catch (AuthenticationException e)
-                {
-                    if (e.ErrorCategory == -1)
-                    {
-                        package.SetTypeERROR("Server malfunction: " + e);
-                        SendPackage(package);
-                        return;
-                    }
-                    if (e.ErrorCategory == 1)
-                    {
-                        package.SetTypeLOGIN_REFUSE(username, e.ToString());
-                        SendPackage(package);
-                        LogIn();
-                    }
-                }
             }
-
-
         }
 
         /// <summary>
@@ -113,88 +142,38 @@ namespace communication
         public void SignUp()
         {
             Authentication auth = new Authentication();
-            String password = "";
-            String confpassword = "";
-            String username = "";
+            String username = packageArguments[1];
+            String password = packageArguments[2];
 
-            //send request for signup information
-            package.SetTypeSIGNUP_REQUEST();
-            SendPackage(package);
-
-            //receive anwser
-            package = ReceivePackage();
-            if (package.packageType == "SIGNUP")
+            try
             {
-                username = package.arguments[0];
-                password = package.arguments[1];
-                confpassword = package.arguments[2];
-
-                try
-                {
-                    auth.CreateUser(username, password);
-                    Console.WriteLine("\nNew account created [user:" + username + " password: " + password + "]");
-                    package.SetTypeSIGNUP_CONFIRM(username);
-                    SendPackage(package);
-                }
-                catch (AuthenticationException e)
-                {
-                    if (e.ErrorCategory == -1)
-                    {
-                        package.SetTypeERROR("Server malfunction: " + e);
-                        SendPackage(package);
-                        return;
-                    }
-                    if (e.ErrorCategory == 1)
-                    {
-                        package.SetTypeSIGNUP_REFUSE(username, e.ToString());
-                        SendPackage(package);
-                        SignUp();
-                    }
-                }
-            }
-        }
-        #endregion
-
-        #region game
-        public void chooseGameAndLobby()
-        {
-            //add test lobby
-            GameManager.CreateGame(game_lib.Game.GameName.BOMBERMAN, "TEST LOBBY FOR USER id="+session.Id);
-
-            //send the player currentGameTypes
-            SendCurrentGameTypes();
-            while (package.packageType != "QUIT_SERVER")
-            {
-                //let client choose game
-                package.SetTypeCHOICE_REQUEST("game choice");
+                auth.CreateUser(username, password);
+                Console.WriteLine("\nNew account created [user:" + username + " password: " + password + "]");
+                package.SetTypeSIGNUP_CONFIRM(username);
                 SendPackage(package);
-                package = ReceivePackage();
-                if (package.packageType == "CHOICE")
+            }
+            catch (AuthenticationException e)
+            {
+                if (e.ErrorCategory == -1)
                 {
-                    int chosenGame = Int32.Parse(package.arguments[0]);
-                    SendCurrentLobbies(chosenGame);
-                    while (package.packageType != "BACK")
-                    {
-                        package = ReceivePackage();
-                        switch (package.packageType)
-                        {
-                            case "CREATE_LOBBY":
-                                game_lib.Game.GameName game = (game_lib.Game.GameName ) Enum.Parse(typeof(game_lib.Game.GameName), package.arguments[0]);
-                                GameManager.CreateGame(game, package.arguments[1]);
-                                break;
-                            case "JOIN_LOBBY":
-                                GameManager.JoinGame(Int32.Parse(package.arguments[0]), session);
-                                while (package.packageType != "QUIT_LOBBY" || package.packageType != "QUIT_GAME")
-                                {
-                                    PlayGame();
-                                }
-                                break;
-                        }
-                    }
+                    package.SetTypeERROR("Server malfunction: " + e);
+                    SendPackage(package);
+                    return;
+                }
+                if (e.ErrorCategory == 1)
+                {
+                    package.SetTypeSIGNUP_REFUSE(username, e.ToString());
+                    SendPackage(package);
                 }
             }
            
         }
+
+   
+        #endregion
+
+        #region game
+
 
         private void PlayGame()
         {

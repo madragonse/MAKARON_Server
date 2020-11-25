@@ -130,15 +130,7 @@ namespace server_lib
             /// <param name="client"></param>
             protected void BeginDataTransmission(game_lib.Session client)
             {
-
-                int choice = communicators[client.Id].logInOrSignUp();
-                if (choice == -1) { throw new Exception("BadPackage"); }
-
-                if (choice == 0) {communicators[client.Id].SignUp();}
-                //after user signed up, make him log in
-                communicators[client.Id].LogIn();
-                //after sucesfull loging in let the client play
-                communicators[client.Id].chooseGameAndLobby();
+                communicators[client.Id].BeginCommunication();
             }
 
 
