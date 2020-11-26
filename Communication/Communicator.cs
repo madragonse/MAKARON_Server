@@ -20,6 +20,7 @@ namespace communication
         private Player session;
         private byte[] buffer;
         private Communication_Package package;
+        private Communication_Package pingPackage;
         private List<String> packageArguments;
 
         private COMMUNICATION_STATE state;
@@ -32,6 +33,8 @@ namespace communication
             this.session = s;
             this.buffer = new byte[1024];
             package = new Communication_Package();
+            pingPackage= new Communication_Package();
+            pingPackage.SetTypePING();
         }
 
         #region packages
@@ -56,47 +59,66 @@ namespace communication
                 Console.Write("\nSENT: " + package.XML);
             }
         }
-
+        public void Ping()
+        {
+            SendPackage(pingPackage);
+        }
         #endregion
 
 
         public void BeginCommunication()
         {
+            //set session timeout for 5seconds
+            this.Session.Stream.ReadTimeout = 5000;
+
             String packageType = "";
             this.state = COMMUNICATION_STATE.LOGIN_SIGNUP;
-            while (true)
+
+            try
             {
-                package = ReceivePackage();
-                packageType = packageArguments[0];
-                if (this.state== COMMUNICATION_STATE.LOGIN_SIGNUP)
+                while (true)
                 {
-                    if (packageType == "SIGNUP") { SignUp(); }
-                    if (packageType == "LOGIN") { LogIn(); }
-                    if (packageType == "REQUEST_GAME_LIST")
-                    {
-                        SendCurrentGameTypes();
-                        this.state = COMMUNICATION_STATE.GAME_LOBBY;
-                    }
-                }
-                if (this.state == COMMUNICATION_STATE.GAME_LOBBY)
-                {
-                    if(packageType == "REQUEST_LOBBY_LIST")
-                    {
-                        SendCurrentLobbies(Int32.Parse(packageArguments[1]));
-                    }
-                    if (packageType == "CREATE_LOBBY") {
-                        game_lib.Game.GameName game = (game_lib.Game.GameName)Enum.Parse(typeof(game_lib.Game.GameName), packageArguments[2]);
-                        GameManager.CreateGame(game, packageArguments[1]);
-                    }
-                    if(packageType== "JOIN_LOBBY")
-                    {
-                        GameManager.JoinGame(Int32.Parse(packageArguments[1]), session);
-                        this.PlayGame();
-                    }
-                }
+                    package = ReceivePackage();
+                    packageType = packageArguments[0];
 
+                    if (packageType == "PING") { continue; } //ignore ping packages
+
+                    if (this.state == COMMUNICATION_STATE.LOGIN_SIGNUP)
+                    {
+                        if (packageType == "SIGNUP") { SignUp(); }
+                        if (packageType == "LOGIN") { LogIn(); }
+                        if (packageType == "REQUEST_GAME_LIST")
+                        {
+                            SendCurrentGameTypes();
+                            this.state = COMMUNICATION_STATE.GAME_LOBBY;
+                        }
+                    }
+                    if (this.state == COMMUNICATION_STATE.GAME_LOBBY)
+                    {
+                        if (packageType == "REQUEST_LOBBY_LIST")
+                        {
+                            SendCurrentLobbies(Int32.Parse(packageArguments[1]));
+                        }
+                        if (packageType == "CREATE_LOBBY")
+                        {
+                            game_lib.Game.GameName game = (game_lib.Game.GameName)Enum.Parse(typeof(game_lib.Game.GameName), packageArguments[2]);
+                            GameManager.CreateGame(game, packageArguments[1]);
+                        }
+                        if (packageType == "JOIN_LOBBY")
+                        {
+                            GameManager.JoinGame(Int32.Parse(packageArguments[1]), session);
+                            this.PlayGame();
+                        }
+                    }
+
+                }
             }
-
+            catch (Exception)
+            {
+                Console.Write("\n\rPlayer " + Session.Id + " has dissconected :(");
+                this.Session = null;
+            }
+           
         }
 
         #region authentication

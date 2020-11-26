@@ -162,24 +162,20 @@ namespace server_lib
 
                 }).Start();
 
+                //ping all clients
                 new Thread(() =>
                 {
                     while (this.running)
                     {
-                        //send ping to all clients
-                        foreach (Communicator c in Communciators)
+                      foreach(Communicator c in communicators)
                         {
-                            ///ping(c.Session);
-                            ///
-                            ///
-                            
+                            //c.Ping();
+                            Thread.Sleep(4500);
                         }
-
                     }
-                    
-                }).Start();
 
-            }
+                }).Start();
+        }
   
     }
     
