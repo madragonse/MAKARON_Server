@@ -9,7 +9,7 @@ namespace game_lib
     public class Lobby
     {
         #region fields
-        private List<Session> waiting;
+        private List<Player> waiting;
         private uint playerLimit;
         /// <summary>
         /// In seconds, the ammount of time before the game automatically starts
@@ -36,7 +36,7 @@ namespace game_lib
             set { isOver = value; }
         }
 
-        public List<Session> Waiting
+        public List<Player> Waiting
         {
             get => waiting;
             set { waiting = value; }
@@ -52,7 +52,7 @@ namespace game_lib
             PlayerLimit = playerLimit;
             WaitingTime = waitingTime;
             this.isOver = false;
-            this.Waiting = new List<Session>();
+            this.Waiting = new List<Player>();
         }
 
         public bool update(ulong deltaTime)
@@ -64,7 +64,7 @@ namespace game_lib
                 return true;
             }
 
-            foreach(Session s in waiting)
+            foreach(Player s in waiting)
             {
                 if (s == null) { waiting.Remove(s);}
             }
@@ -72,7 +72,7 @@ namespace game_lib
             return false;
         }
 
-        public bool AddPlayer(Session p)
+        public bool AddPlayer(Player p)
         {
             if (p != null && !CheckIfAlreadyJoined(p) && waiting.Count< playerLimit)
             {
@@ -82,16 +82,16 @@ namespace game_lib
             return false;
         }
 
-        private bool CheckIfAlreadyJoined(Session p)
+        private bool CheckIfAlreadyJoined(Player p)
         {
-            foreach(Session w in waiting)
+            foreach(Player w in waiting)
             {
                 if (w == p) { return true; }
             }
             return false;
         }
 
-        public void RemovePlayer(Session p)
+        public void RemovePlayer(Player p)
         {
             if (p != null)
             {
@@ -99,7 +99,7 @@ namespace game_lib
             }
         }
 
-        public List<Session> GetAllPlayers()
+        public List<Player> GetAllPlayers()
         {
             return this.Waiting;
         }
@@ -108,7 +108,7 @@ namespace game_lib
         {
             this.IsOver = true;
             //clean up the waiting clients list
-            foreach(Session w in Waiting)
+            foreach(Player w in Waiting)
             {
                 if (w == null) { Waiting.Remove(w);}
             }

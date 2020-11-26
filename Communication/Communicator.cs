@@ -17,17 +17,17 @@ namespace communication
            GAME_LOBBY,
            PLAYING
         }
-        private Session session;
+        private Player session;
         private byte[] buffer;
         private Communication_Package package;
         private List<String> packageArguments;
 
         private COMMUNICATION_STATE state;
 
-        public Session Session { get => session; set => session = value; }
+        public Player Session { get => session; set => session = value; }
         public byte[] Buffer { get => buffer; set => buffer = value; }
 
-        public Communicator(Session s)
+        public Communicator(Player s)
         {
             this.session = s;
             this.buffer = new byte[1024];
@@ -53,6 +53,7 @@ namespace communication
             {
                 byte[] data = package.ToByteArray();
                 Session.Stream.Write(data, 0, data.Length);
+                Console.Write("\nSENT: " + package.XML);
             }
         }
 
@@ -189,7 +190,10 @@ namespace communication
             {
                 if ((int)g.getGameType() == gameId)
                 {
-                    data.Add(g.ToString());
+                    foreach(String gameData in g.getData())
+                    {
+                        data.Add(gameData);
+                    } 
                 }
             }
             package.SetTypeLIST(data);

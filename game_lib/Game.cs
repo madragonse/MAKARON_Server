@@ -21,13 +21,13 @@ namespace game_lib
             SOME_OTHER_GAME
         }
 
-        private List<Session> players;
+        private List<Player> players;
         private Game_state state;
         private Lobby lobby;
         private String name;
 
         #region field_definitions
-        public List<Session> Players
+        public List<Player> Players
         {
             get => players;
             set { players = value; }
@@ -51,7 +51,7 @@ namespace game_lib
             state = Game_state.LOADING_GAME;
             //start the lobby
             this.StartLobby(playerLimit, waitingTime);
-            this.Players = new List<Session>();
+            this.Players = new List<Player>();
             this.Name = name;
         }
 
@@ -69,7 +69,7 @@ namespace game_lib
         }
 
 
-        public bool AddPlayer(Session p)
+        public bool AddPlayer(Player p)
         {
             if (this.State == Game_state.LOBBY) {
                 return lobby.AddPlayer(p);
@@ -77,7 +77,7 @@ namespace game_lib
             //
             return false;
         }
-        public bool RemovePlayer(Session p)
+        public bool RemovePlayer(Player p)
         {
             if (this.State == Game_state.LOBBY) { lobby.RemovePlayer(p); return true; }
             //
@@ -101,6 +101,17 @@ namespace game_lib
                     "\n\rPlayers: " + getNumberOfPlayers()+"/"+this.lobby.PlayerLimit+ 
                     "\n\rState: " + this.state.ToString(); 
         }
+
+        public String[] getData()
+        {
+            String [] result = { this.Name,
+                                 getGameType().ToString(),
+                                 getNumberOfPlayers().ToString(),
+                                 this.lobby.PlayerLimit.ToString(),
+                                 this.state.ToString() };
+            return result;
+        }
+           
 
 
         private uint getNumberOfPlayers()

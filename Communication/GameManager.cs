@@ -33,7 +33,7 @@ namespace communication
             return games;
         }
 
-        public static bool JoinGame(int gameId, game_lib.Session session)
+        public static bool JoinGame(int gameId, game_lib.Player session)
         {
             if (gameId > games.Count) { return false; }
             return games[gameId].AddPlayer(session);

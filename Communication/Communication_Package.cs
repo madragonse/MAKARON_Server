@@ -49,6 +49,7 @@ namespace communication
         this.XML += "<type>REQUEST_GAME_LIST</type>";
         this.XML += "</PACKAGE>";
     }
+    
     #endregion
 
     #region multipleargs
@@ -132,6 +133,7 @@ namespace communication
         foreach (String s in list)
         {
             this.XML += "<arg" + i + ">" + s + "</arg" + i + ">";
+            i++; 
         }
         this.XML += "</PACKAGE>";
     }

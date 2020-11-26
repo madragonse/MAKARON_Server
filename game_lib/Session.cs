@@ -11,9 +11,9 @@ namespace game_lib
     /// Structure for holding information about individual server client sessions.
     /// That is- the TCP Stream of the client and his unique ID.
     /// </summary>
-    public class Session
+    public class Player
     {
-        public Session(int id, NetworkStream stream)
+        public Player(int id, NetworkStream stream)
         {
             Id = id;
             Stream = stream;

@@ -16,9 +16,6 @@ namespace server_app
             int port = 9000;
             Server server = new Server(adresIP, port);
 
-           
-            
-
             server.Start();
         }
     }

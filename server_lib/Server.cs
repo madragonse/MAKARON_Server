@@ -21,7 +21,7 @@ namespace server_lib
             int clientCounter = 0;
             TcpListener tcpListener;
     
-            public delegate void TransmissionDataDelegate(game_lib.Session client);
+            public delegate void TransmissionDataDelegate(game_lib.Player client);
             #endregion
 
             #region field_definitions
@@ -107,7 +107,7 @@ namespace server_lib
                     Console.Write("\nNew client connected! Client id: " + clientCounter);
 
                     NetworkStream stream = tcpClient.GetStream();
-                    game_lib.Session client= new game_lib.Session(clientCounter, stream);
+                    game_lib.Player client= new game_lib.Player(clientCounter, stream);
                     //create a new buffer for the client
                     communicators.Add(new Communicator(client));
                     
@@ -128,7 +128,7 @@ namespace server_lib
             /// Welcomes given client to the server and allows him to proceed to log in or sign up.
             /// </summary>
             /// <param name="client"></param>
-            protected void BeginDataTransmission(game_lib.Session client)
+            protected void BeginDataTransmission(game_lib.Player client)
             {
                 communicators[client.Id].BeginCommunication();
             }
