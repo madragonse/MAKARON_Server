@@ -20,7 +20,7 @@ namespace server_lib
             List<Communicator> communicators = new List<Communicator>();
             int clientCounter = 0;
             TcpListener tcpListener;
-    
+            private static Mutex communicatorsMutex = new Mutex();
             public delegate void TransmissionDataDelegate(game_lib.Player client);
             #endregion
 
@@ -102,16 +102,20 @@ namespace server_lib
 
             protected void AcceptClient()
             {
-                while (true)
+                while (this.running)
                 {
                     TcpClient tcpClient = TcpListener.AcceptTcpClient();
                     Console.Write("\nNew client connected! Client id: " + clientCounter);
 
                     NetworkStream stream = tcpClient.GetStream();
                     game_lib.Player client= new game_lib.Player(clientCounter, stream);
-                    //create a new buffer for the client
+
+
+                    //create a communicator object
+                    communicatorsMutex.WaitOne();
                     communicators.Add(new Communicator(client));
-                    
+                    communicatorsMutex.ReleaseMutex();
+
                     TransmissionDataDelegate transmissionDelegate = new TransmissionDataDelegate(BeginDataTransmission);
                     transmissionDelegate.BeginInvoke(client, TransmissionCallback, tcpClient);
                     clientCounter++;
@@ -163,16 +167,18 @@ namespace server_lib
 
                 }).Start();
 
-                //ping all clients
+            //ping all clients
                 new Thread(() =>
                 {
                     while (this.running)
                     {
-                      foreach(Communicator c in communicators)
+                        communicatorsMutex.WaitOne();
+                        foreach (Communicator c in communicators)
                         {
                             //c.Ping();
                             Thread.Sleep(4500);
                         }
+                        communicatorsMutex.ReleaseMutex();
                     }
                 }).Start();
         }
