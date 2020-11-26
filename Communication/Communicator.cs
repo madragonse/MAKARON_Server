@@ -52,12 +52,13 @@ namespace communication
 
         private void SendPackage(Communication_Package package)
         {
-            if (this.Session.Stream != null)
+            try
             {
                 byte[] data = package.ToByteArray();
                 Session.Stream.Write(data, 0, data.Length);
                 Console.Write("\nSENT: " + package.XML);
             }
+            catch (Exception){}
         }
         public void Ping()
         {

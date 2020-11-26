@@ -95,6 +95,7 @@ namespace server_lib
 
             protected void StartListening()
             {
+                this.running = true;
                 TcpListener = new TcpListener(IPAddress, Port);
                 TcpListener.Start();
             }
@@ -173,7 +174,6 @@ namespace server_lib
                             Thread.Sleep(4500);
                         }
                     }
-
                 }).Start();
         }
   
