@@ -32,7 +32,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="MySql.Data">
-      <HintPath>..\server_lib\bin\Debug\MySql.Data.dll</HintPath>
+      <HintPath>..\MySql.Data.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -50,7 +50,7 @@
     <Compile Include="Communication_Package.cs" />
     <Compile Include="Communicator.cs" />
     <Compile Include="Database.cs" />
-    <Compile Include="GameManager.cs" />
+    <Compile Include="LobbyManager.cs" />
     <Compile Include="Package.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

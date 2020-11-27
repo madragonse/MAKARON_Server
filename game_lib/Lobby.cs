@@ -9,10 +9,10 @@ namespace game_lib
     public class Lobby
     {
         #region fields
-        private List<Player> waiting;
+        private List<Session> waiting;
         private uint playerLimit;
         /// <summary>
-        /// In seconds, the ammount of time before the game automatically starts
+        /// In seconds, the ammount of time before the game automatically starts 
         /// </summary>
         private ulong waitingTime;
         private bool isOver;
@@ -36,7 +36,7 @@ namespace game_lib
             set { isOver = value; }
         }
 
-        public List<Player> Waiting
+        public List<Session> Waiting
         {
             get => waiting;
             set { waiting = value; }
@@ -47,12 +47,12 @@ namespace game_lib
         /// </summary>
         /// <param max players in lobby="playerLimit"></param>
         /// <param time after which the game autostarts="waitingTime"></param>
-        public Lobby(uint playerLimit, ulong waitingTime)
+        public Lobby(uint playerLimit, ulong waitingTime, String roomName, game_lib.Game.GameName gameName)
         {
             PlayerLimit = playerLimit;
             WaitingTime = waitingTime;
             this.isOver = false;
-            this.Waiting = new List<Player>();
+            this.Waiting = new List<Session>();  
         }
 
         public bool update(ulong deltaTime)
@@ -64,7 +64,7 @@ namespace game_lib
                 return true;
             }
 
-            foreach(Player s in waiting)
+            foreach(Session s in waiting)
             {
                 if (s == null) { waiting.Remove(s);}
             }
@@ -72,7 +72,7 @@ namespace game_lib
             return false;
         }
 
-        public bool AddPlayer(Player p)
+        public bool AddPlayer(Session p)
         {
             if (p != null && !CheckIfAlreadyJoined(p) && waiting.Count< playerLimit)
             {
@@ -82,16 +82,16 @@ namespace game_lib
             return false;
         }
 
-        private bool CheckIfAlreadyJoined(Player p)
+        private bool CheckIfAlreadyJoined(Session p)
         {
-            foreach(Player w in waiting)
+            foreach(Session w in waiting)
             {
                 if (w == p) { return true; }
             }
             return false;
         }
 
-        public void RemovePlayer(Player p)
+        public void RemovePlayer(Session p)
         {
             if (p != null)
             {
@@ -99,7 +99,7 @@ namespace game_lib
             }
         }
 
-        public List<Player> GetAllPlayers()
+        public List<Session> GetAllPlayers()
         {
             return this.Waiting;
         }
@@ -108,7 +108,7 @@ namespace game_lib
         {
             this.IsOver = true;
             //clean up the waiting clients list
-            foreach(Player w in Waiting)
+            foreach(Session w in Waiting)
             {
                 if (w == null) { Waiting.Remove(w);}
             }

@@ -14,10 +14,11 @@ namespace communication
         public enum COMMUNICATION_STATE
         {
            LOGIN_SIGNUP,
-           GAME_LOBBY,
-           PLAYING
+           SERVER,
+           LOBBY,
+           GAME
         }
-        private Player session;
+        private Session session;
         private byte[] buffer;
         private Communication_Package package;
         private Communication_Package pingPackage;
@@ -25,15 +26,15 @@ namespace communication
 
         private COMMUNICATION_STATE state;
 
-        public Player Session { get => session; set => session = value; }
+        public Session Session { get => session; set => session = value; }
         public byte[] Buffer { get => buffer; set => buffer = value; }
 
-        public Communicator(Player s)
+        public Communicator(Session s)
         {
             this.session = s;
             this.buffer = new byte[1024];
             package = new Communication_Package();
-            pingPackage= new Communication_Package();
+            pingPackage = new Communication_Package();
             pingPackage.SetTypePING();
         }
 
@@ -91,23 +92,33 @@ namespace communication
                         if (packageType == "REQUEST_LOBBY_LIST")
                         {
                             SendCurrentLobbies();
-                            this.state = COMMUNICATION_STATE.GAME_LOBBY;
+                            this.state = COMMUNICATION_STATE.SERVER;
                         }
                     }
-                    if (this.state == COMMUNICATION_STATE.GAME_LOBBY)
+                    if (this.state == COMMUNICATION_STATE.SERVER)
                     {
                         if (packageType == "CREATE_LOBBY")
                         {
                             game_lib.Game.GameName game = (game_lib.Game.GameName)Enum.Parse(typeof(game_lib.Game.GameName), packageArguments[2]);
-                            GameManager.CreateGame(game, packageArguments[1]);
+                            LobbyManager.CreateLobby(game, packageArguments[1]);
                         }
                         if (packageType == "JOIN_LOBBY")
                         {
-                            GameManager.JoinGame(Int32.Parse(packageArguments[1]), session);
+                            LobbyManager.JoinLobby(Int32.Parse(packageArguments[1]), session);
                             this.PlayGame();
                         }
                     }
+                    if (this.state == COMMUNICATION_STATE.LOBBY)
+                    {
+                        if (packageType == "READY")
+                        {
+                            
+                        }
+                    }
+                    if (this.state == COMMUNICATION_STATE.GAME)
+                    {
 
+                    }
                 }
             }
             catch (Exception)
@@ -202,18 +213,18 @@ namespace communication
 
 
         private void SendCurrentLobbies()
-        {
+        {/* TODO
             List<String> data = new List<string>();
-            List<Game> currGames = GameManager.GetAllGames();
-            foreach (Game g in currGames)
+            List<Lobby> currLobbys = LobbyManager.GetAllLobbys();
+            foreach (Lobby l in currLobbys)
             {
-                foreach(String gameData in g.getData())
+                foreach(String gameData in l.getData())
                 {
                     data.Add(gameData);
                 } 
             }
             package.SetTypeLIST(data);
-            SendPackage(package);
+            SendPackage(package);*/
         }
 
 

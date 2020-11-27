@@ -21,16 +21,16 @@ namespace game_lib
             SOME_OTHER_GAME
         }
 
-        private List<Player> players;
+        private List<Session> sessions;
         private Game_state state;
         private Lobby lobby;
         private String name;
 
         #region field_definitions
-        public List<Player> Players
+        public List<Session> Sessions
         {
-            get => players;
-            set { players = value; }
+            get => sessions;
+            set { sessions = value; }
         }
         public Game_state State
         {
@@ -50,26 +50,14 @@ namespace game_lib
         {
             state = Game_state.LOADING_GAME;
             //start the lobby
-            this.StartLobby(playerLimit, waitingTime);
-            this.Players = new List<Player>();
+            //TODO start game
+            this.Sessions = new List<Session>();
             this.Name = name;
         }
 
-        private void StartLobby(uint playerLimit, ulong waitingTime)
-        {
-            this.lobby = new Lobby(playerLimit, waitingTime);
-            this.State = Game_state.LOBBY;
-        }
-
-        private void StopLobby()
-        {
-            //transfer all players from lobby to the game list
-            this.players = lobby.GetAllPlayers();
-            this.State = Game_state.IN_GAME;
-        }
 
 
-        public bool AddPlayer(Player p)
+        public bool AddPlayer(Session p)
         {
             if (this.State == Game_state.LOBBY) {
                 return lobby.AddPlayer(p);
@@ -77,7 +65,7 @@ namespace game_lib
             //
             return false;
         }
-        public bool RemovePlayer(Player p)
+        public bool RemovePlayer(Session p)
         {
             if (this.State == Game_state.LOBBY) { lobby.RemovePlayer(p); return true; }
             //
@@ -86,11 +74,7 @@ namespace game_lib
 
         public void update(ulong deltaTime)
         {
-            if (this.State == Game_state.LOBBY)
-            {
-                if (lobby.update(deltaTime)){StopLobby();}
-            }
-            if (this.State == Game.Game_state.IN_GAME || this.State == Game.Game_state.AFTER_GAME) { updateGame(deltaTime);}
+
         }
 
 
@@ -117,7 +101,7 @@ namespace game_lib
         private uint getNumberOfPlayers()
         {
             if (this.State == Game_state.LOBBY) { return (uint)this.lobby.Waiting.Count; }
-            return (uint) this.Players.Count;
+            return (uint) this.Sessions.Count;
         }
 
         public abstract void updateGame(ulong deltaTime);

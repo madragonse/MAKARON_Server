@@ -21,7 +21,7 @@ namespace server_lib
             int clientCounter = 0;
             TcpListener tcpListener;
             private static Mutex communicatorsMutex = new Mutex();
-            public delegate void TransmissionDataDelegate(game_lib.Player client);
+            public delegate void TransmissionDataDelegate(game_lib.Session client);
             #endregion
 
             #region field_definitions
@@ -108,7 +108,7 @@ namespace server_lib
                     Console.Write("\nNew client connected! Client id: " + clientCounter);
 
                     NetworkStream stream = tcpClient.GetStream();
-                    game_lib.Player client= new game_lib.Player(clientCounter, stream);
+                    game_lib.Session client= new game_lib.Session(clientCounter, stream);
 
 
                     //create a communicator object
@@ -133,7 +133,7 @@ namespace server_lib
             /// Welcomes given client to the server and allows him to proceed to log in or sign up.
             /// </summary>
             /// <param name="client"></param>
-            protected void BeginDataTransmission(game_lib.Player client)
+            protected void BeginDataTransmission(game_lib.Session client)
             {
                 communicators[client.Id].BeginCommunication();
             }
@@ -161,7 +161,7 @@ namespace server_lib
                 {
                     while (this.running)
                     {
-                        GameManager.update((ulong)0.1);
+                        LobbyManager.update((ulong)0.1);
                         Thread.Sleep(100);
                     }
 
