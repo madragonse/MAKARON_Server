@@ -10,7 +10,6 @@ namespace communication
     public class GameManager
     {
 
-
         public static List<game_lib.Game> games= new List<game_lib.Game>();
 
         public static void CreateGame(game_lib.Game.GameName name,String roomName)

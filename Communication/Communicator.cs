@@ -88,18 +88,14 @@ namespace communication
                     {
                         if (packageType == "SIGNUP") { SignUp(); }
                         if (packageType == "LOGIN") { LogIn(); }
-                        if (packageType == "REQUEST_GAME_LIST")
+                        if (packageType == "REQUEST_LOBBY_LIST")
                         {
-                            SendCurrentGameTypes();
+                            SendCurrentLobbies();
                             this.state = COMMUNICATION_STATE.GAME_LOBBY;
                         }
                     }
                     if (this.state == COMMUNICATION_STATE.GAME_LOBBY)
                     {
-                        if (packageType == "REQUEST_LOBBY_LIST")
-                        {
-                            SendCurrentLobbies(Int32.Parse(packageArguments[1]));
-                        }
                         if (packageType == "CREATE_LOBBY")
                         {
                             game_lib.Game.GameName game = (game_lib.Game.GameName)Enum.Parse(typeof(game_lib.Game.GameName), packageArguments[2]);
@@ -205,35 +201,22 @@ namespace communication
         }
 
 
-        private void SendCurrentLobbies(int gameId)
+        private void SendCurrentLobbies()
         {
             List<String> data = new List<string>();
             List<Game> currGames = GameManager.GetAllGames();
             foreach (Game g in currGames)
             {
-                if ((int)g.getGameType() == gameId)
+                foreach(String gameData in g.getData())
                 {
-                    foreach(String gameData in g.getData())
-                    {
-                        data.Add(gameData);
-                    } 
-                }
+                    data.Add(gameData);
+                } 
             }
             package.SetTypeLIST(data);
             SendPackage(package);
         }
 
-        private void SendCurrentGameTypes()
-        {
-            List<String> data = new List<string>();
-            var values = Enum.GetValues(typeof(game_lib.Game.GameName));
-            foreach (var v in values)
-            {
-                data.Add(v.ToString());
-            }
-            package.SetTypeLIST(data);
-            SendPackage(package);
-        }
+
         #endregion
     }
 }
