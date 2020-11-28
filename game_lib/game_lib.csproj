@@ -41,11 +41,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GameException.cs" />
     <Compile Include="Game_Bomberman.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="Lobby.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Session.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Packages\packages.csproj">
+      <Project>{95434a1b-0e23-4abf-9b51-3e466174b9d6}</Project>
+      <Name>packages</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

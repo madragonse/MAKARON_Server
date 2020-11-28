@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using game_lib;
-
+using database;
 
 namespace communication
 {
@@ -18,54 +18,25 @@ namespace communication
            LOBBY,
            GAME
         }
+
+        #region fields
         private Session session;
-        private byte[] buffer;
-        private Communication_Package package;
-        private Communication_Package pingPackage;
-        private List<String> packageArguments;
-
         private COMMUNICATION_STATE state;
+        private Lobby currentLobby;
+        private Game currentGame;
+        #endregion
 
+        #region field_definitions
         public Session Session { get => session; set => session = value; }
-        public byte[] Buffer { get => buffer; set => buffer = value; }
+        public COMMUNICATION_STATE State { get=>state; set=>state=value; }
+        #endregion
 
         public Communicator(Session s)
         {
             this.session = s;
-            this.buffer = new byte[1024];
-            package = new Communication_Package();
-            pingPackage = new Communication_Package();
-            pingPackage.SetTypePING();
+            this.currentGame = null;
+            this.currentLobby = null;
         }
-
-        #region packages
-        private Communication_Package ReceivePackage()
-        {
-            Array.Clear(Buffer, 0, Buffer.Length);
-            Session.Stream.Read(Buffer, 0, Buffer.Length);
-            Communication_Package package = new Communication_Package(Buffer);
-            //get arguments
-            this.packageArguments = package.getArguments();
-            //write to console for debbugging purposes
-            Console.Write("\nRECEIVED: "+package.XML);
-            return package;
-        }
-
-        private void SendPackage(Communication_Package package)
-        {
-            try
-            {
-                byte[] data = package.ToByteArray();
-                Session.Stream.Write(data, 0, data.Length);
-                Console.Write("\nSENT: " + package.XML);
-            }
-            catch (Exception){}
-        }
-        public void Ping()
-        {
-            SendPackage(pingPackage);
-        }
-        #endregion
 
 
         public void BeginCommunication()
@@ -75,13 +46,12 @@ namespace communication
 
             String packageType = "";
             this.state = COMMUNICATION_STATE.LOGIN_SIGNUP;
-
             try
             {
                 while (true)
                 {
-                    package = ReceivePackage();
-                    packageType = packageArguments[0];
+                    session.ReceivePackage();
+                    packageType = session.PackageArguments[0];
 
                     if (packageType == "PING") { continue; } //ignore ping packages
 
@@ -91,33 +61,29 @@ namespace communication
                         if (packageType == "LOGIN") { LogIn(); }
                         if (packageType == "REQUEST_LOBBY_LIST")
                         {
+                            //DEBUG
+                            GameAndLobbyManager.CreateLobby("LOBBY FOR PLAYER "+session.Id.ToString(), Game.GAME_TYPE.BOMBERMAN);
                             SendCurrentLobbies();
                             this.state = COMMUNICATION_STATE.SERVER;
                         }
                     }
                     if (this.state == COMMUNICATION_STATE.SERVER)
                     {
-                        if (packageType == "CREATE_LOBBY")
-                        {
-                            game_lib.Game.GameName game = (game_lib.Game.GameName)Enum.Parse(typeof(game_lib.Game.GameName), packageArguments[2]);
-                            LobbyManager.CreateLobby(game, packageArguments[1]);
-                        }
-                        if (packageType == "JOIN_LOBBY")
-                        {
-                            LobbyManager.JoinLobby(Int32.Parse(packageArguments[1]), session);
-                            this.PlayGame();
-                        }
+                        if (packageType == "CREATE_LOBBY") { CreateLobby(); }
+                        if (packageType == "JOIN_LOBBY") { JoinLobby();  }
+                        if (packageType == "REQUEST_LOBBY_LIST") { SendCurrentLobbies();}
+                        if (packageType == "REQUEST_LOBBY_LIST_ARG") { SendCurrentLobbiesForChosenGame(); }
                     }
                     if (this.state == COMMUNICATION_STATE.LOBBY)
                     {
-                        if (packageType == "READY")
-                        {
-                            
-                        }
+                        if (this.currentLobby == null){ this.state = COMMUNICATION_STATE.SERVER;}
+                        LobbyLoop(); 
                     }
                     if (this.state == COMMUNICATION_STATE.GAME)
                     {
-
+                        if (this.currentGame == null) { this.state = COMMUNICATION_STATE.SERVER; }
+                        this.currentGame.gameLoop(this.session);
+                        this.state = COMMUNICATION_STATE.LOBBY;
                     }
                 }
             }
@@ -125,6 +91,7 @@ namespace communication
             {
                 Console.Write("\n\rPlayer " + Session.Id + " has dissconected :(");
                 this.Session = null;
+                //quit lobby or game
             }
            
         }
@@ -142,26 +109,26 @@ namespace communication
 
             try
             {
-                username = packageArguments[1];
-                password = packageArguments[2];
+                username = session.PackageArguments[1];
+                password = session.PackageArguments[2];
                 auth.AuthorizeUser(username, password);
                 Console.WriteLine("\nA user loged in [username:" + username + "]");
 
-                package.SetTypeLOGIN_CONFIRM(username);
-                SendPackage(package);
+                session.Package.SetTypeLOGIN_CONFIRM(username);
+                session.Send(session.Package);
             }
             catch (AuthenticationException e)
             {
                 if (e.ErrorCategory == -1)
                 {
-                    package.SetTypeERROR("Server malfunction: " + e);
-                    SendPackage(package);
+                    session.Package.SetTypeERROR("Server malfunction: " + e);
+                    session.Send(session.Package);
                     return;
                 }
                 if (e.ErrorCategory == 1)
                 {
-                    package.SetTypeLOGIN_REFUSE(username, e.ToString());
-                    SendPackage(package);
+                    session.Package.SetTypeLOGIN_REFUSE(username, e.ToString());
+                    session.Send(session.Package);
                 }
             }
         }
@@ -173,28 +140,28 @@ namespace communication
         public void SignUp()
         {
             Authentication auth = new Authentication();
-            String username = packageArguments[1];
-            String password = packageArguments[2];
+            String username = session.PackageArguments[1];
+            String password = session.PackageArguments[2];
 
             try
             {
                 auth.CreateUser(username, password);
                 Console.WriteLine("\nNew account created [user:" + username + " password: " + password + "]");
-                package.SetTypeSIGNUP_CONFIRM(username);
-                SendPackage(package);
+                session.Package.SetTypeSIGNUP_CONFIRM(username);
+                session.Send(session.Package);
             }
             catch (AuthenticationException e)
             {
                 if (e.ErrorCategory == -1)
                 {
-                    package.SetTypeERROR("Server malfunction: " + e);
-                    SendPackage(package);
+                    session.Package.SetTypeERROR("Server malfunction: " + e);
+                    session.Send(session.Package);
                     return;
                 }
                 if (e.ErrorCategory == 1)
                 {
-                    package.SetTypeSIGNUP_REFUSE(username, e.ToString());
-                    SendPackage(package);
+                    session.Package.SetTypeSIGNUP_REFUSE(username, e.ToString());
+                    session.Send(session.Package);
                 }
             }
            
@@ -204,30 +171,76 @@ namespace communication
         #endregion
 
         #region game
-
-
-        private void PlayGame()
+        private void JoinLobby()
         {
-            //doGameStuffHere
+            try
+            {
+                this.currentLobby = GameAndLobbyManager.JoinLobby(Int32.Parse(session.PackageArguments[1]), session);
+                this.state = COMMUNICATION_STATE.LOBBY;
+            }
+            catch(Exception e)
+            {
+                session.Package.SetTypeJOIN_LOBBY_REFUSE(e.ToString());
+                session.Send(session.Package);
+                return;
+            }
+            
+        }
+
+        private void CreateLobby()
+        {
+            try
+            {
+                game_lib.Game.GAME_TYPE game = (game_lib.Game.GAME_TYPE)Enum.Parse(typeof(game_lib.Game.GAME_TYPE), session.PackageArguments[2]);
+                GameAndLobbyManager.CreateLobby(session.PackageArguments[1], game);
+            }
+            catch (Exception e)
+            {
+                session.Package.SetTypeCREATE_LOBBY_REFUSE(e.ToString());
+                session.Send(session.Package);
+                return;
+            }
+
+        }
+
+        private void LobbyLoop()
+        {
+            int gameID = currentLobby.LobbyLoop(this.session);
+            if (gameID == -1)
+            {
+                session.Package.SetTypeERROR("Lobby error?");
+                session.Send(session.Package);
+                return;
+            }
+            currentGame = GameAndLobbyManager.getGame(gameID);
+            this.state = COMMUNICATION_STATE.GAME;
         }
 
 
         private void SendCurrentLobbies()
-        {/* TODO
+        {
             List<String> data = new List<string>();
-            List<Lobby> currLobbys = LobbyManager.GetAllLobbys();
+            List<Lobby> currLobbys = GameAndLobbyManager.GetAllLobbys();
             foreach (Lobby l in currLobbys)
             {
-                foreach(String gameData in l.getData())
-                {
-                    data.Add(gameData);
-                } 
+                data.Add(l.toString());
             }
-            package.SetTypeLIST(data);
-            SendPackage(package);*/
+            session.Package.SetTypeLIST(data);
+            session.Send(session.Package);
         }
 
-
+        private void SendCurrentLobbiesForChosenGame()
+        {
+            List<String> data = new List<string>();
+            List<Lobby> currLobbys = GameAndLobbyManager.GetAllLobbys();
+            Game.GAME_TYPE game= (game_lib.Game.GAME_TYPE)Enum.Parse(typeof(game_lib.Game.GAME_TYPE), session.PackageArguments[1]);
+            foreach (Lobby l in currLobbys)
+            {
+                if (l.getGameType() == game){ data.Add(l.toString());  }
+            }
+            session.Package.SetTypeLIST(data);
+            session.Send(session.Package);
+        }
         #endregion
     }
 }

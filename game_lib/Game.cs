@@ -3,110 +3,69 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using packages;
+
 
 namespace game_lib
 {
     public abstract class Game
     {
-        public enum Game_state
+        public enum GAME_STATE
         {
-            LOADING_GAME,
             LOBBY,
-            IN_GAME,
-            AFTER_GAME
+            IN_GAME
         }
-        public enum GameName
+
+
+        public enum GAME_TYPE
         {
             BOMBERMAN,
             SOME_OTHER_GAME
         }
 
         private List<Session> sessions;
-        private Game_state state;
-        private Lobby lobby;
-        private String name;
-
+        private GAME_STATE state;
         #region field_definitions
         public List<Session> Sessions
         {
             get => sessions;
             set { sessions = value; }
         }
-        public Game_state State
+        public GAME_STATE State
         {
             get => state;
             set { state = value; }
         }
-        public String Name
-        {
-            get => name;
-            set { name = value; }
-        }
-
-
         #endregion
 
-        public Game(uint playerLimit,ulong waitingTime, String name)
-        {
-            state = Game_state.LOADING_GAME;
-            //start the lobby
-            //TODO start game
+        public Game()
+        {    
             this.Sessions = new List<Session>();
-            this.Name = name;
         }
 
-
-
-        public bool AddPlayer(Session p)
+        public void AddPlayers(List<Session> players)
         {
-            if (this.State == Game_state.LOBBY) {
-                return lobby.AddPlayer(p);
-            }
-            //
-            return false;
-        }
-        public bool RemovePlayer(Session p)
-        {
-            if (this.State == Game_state.LOBBY) { lobby.RemovePlayer(p); return true; }
-            //
-            return false;
+            this.sessions = players;
         }
 
-        public void update(ulong deltaTime)
+        public void AddPlayer(Session p)
         {
-
+            this.sessions.Add(p);
+        }
+        public void RemovePlayer(Session p)
+        {
+            this.sessions.Remove(p);
         }
 
-
-        public override String ToString()
+        public uint getNumberOfPlayers()
         {
-            return  "\n\rLobbyName: "+this.Name+ 
-                    "\n\rGameType: "+ getGameType()+ 
-                    "\n\rPlayers: " + getNumberOfPlayers()+"/"+this.lobby.PlayerLimit+ 
-                    "\n\rState: " + this.state.ToString(); 
-        }
-
-        public String[] getData()
-        {
-            String [] result = { this.Name,
-                                 getGameType().ToString(),
-                                 getNumberOfPlayers().ToString(),
-                                 this.lobby.PlayerLimit.ToString(),
-                                 this.state.ToString() };
-            return result;
-        }
-           
-
-
-        private uint getNumberOfPlayers()
-        {
-            if (this.State == Game_state.LOBBY) { return (uint)this.lobby.Waiting.Count; }
             return (uint) this.Sessions.Count;
         }
 
-        public abstract void updateGame(ulong deltaTime);
+        public abstract void Update(ulong deltaTime);
         public abstract void StartGame();
         public abstract void StopGame();
-        public abstract GameName getGameType();
+        public abstract GAME_TYPE getGameType();
+        public abstract void gameLoop(Session sesion);
     }
 }

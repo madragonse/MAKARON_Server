@@ -155,13 +155,14 @@ namespace server_lib
             }
 
             #endregion
+        //TO DO MAKE THIS ACTUALLY GOOD
             public void GlobalUpdatingThread()
             {
                 new Thread(() =>
                 {
                     while (this.running)
                     {
-                        LobbyManager.update((ulong)0.1);
+                        GameAndLobbyManager.Update((ulong)100);
                         Thread.Sleep(100);
                     }
 

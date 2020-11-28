@@ -11,6 +11,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "game_lib", "game_lib\game_l
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "communication", "Communication\communication.csproj", "{813885F3-3CC6-49D1-9E4B-612A461F1088}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "packages", "Packages\packages.csproj", "{95434A1B-0E23-4ABF-9B51-3E466174B9D6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "database", "Authentication\database.csproj", "{493A1BCB-622E-44D1-9D2A-42C07AF64363}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +37,14 @@ Global
 		{813885F3-3CC6-49D1-9E4B-612A461F1088}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{813885F3-3CC6-49D1-9E4B-612A461F1088}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{813885F3-3CC6-49D1-9E4B-612A461F1088}.Release|Any CPU.Build.0 = Release|Any CPU
+		{95434A1B-0E23-4ABF-9B51-3E466174B9D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{95434A1B-0E23-4ABF-9B51-3E466174B9D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{95434A1B-0E23-4ABF-9B51-3E466174B9D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{95434A1B-0E23-4ABF-9B51-3E466174B9D6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{493A1BCB-622E-44D1-9D2A-42C07AF64363}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{493A1BCB-622E-44D1-9D2A-42C07AF64363}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{493A1BCB-622E-44D1-9D2A-42C07AF64363}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{493A1BCB-622E-44D1-9D2A-42C07AF64363}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
