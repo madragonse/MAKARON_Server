@@ -62,10 +62,18 @@ namespace game_lib
             return (uint) this.Sessions.Count;
         }
 
+        public void sendToEveryone(Package package)
+        {
+            foreach(Session s in this.sessions)
+            {
+                s.Send(package);
+            }
+        }
+
         public abstract void Update(ulong deltaTime);
         public abstract void StartGame();
         public abstract void StopGame();
         public abstract GAME_TYPE getGameType();
-        public abstract void gameLoop(Session sesion);
+        public abstract void gameLoop();
     }
 }

@@ -82,7 +82,7 @@ namespace communication
                     if (this.state == COMMUNICATION_STATE.GAME)
                     {
                         if (this.currentGame == null) { this.state = COMMUNICATION_STATE.SERVER; }
-                        this.currentGame.gameLoop(this.session);
+                        //TODO//this.currentGame.gameLoop(this.session);
                         this.state = COMMUNICATION_STATE.LOBBY;
                     }
                 }

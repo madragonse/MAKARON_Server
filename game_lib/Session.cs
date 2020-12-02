@@ -60,7 +60,7 @@ namespace game_lib
             catch (Exception) { }
         }
 
-        public void Send(Communication_Package package)
+        public void Send(Package package)
         {
             try
             {

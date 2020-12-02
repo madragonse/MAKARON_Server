@@ -12,7 +12,10 @@ namespace game_lib
         #region fields
         //TO DO TODO chyba jednak nie ushort
         //ushort[,] map;
-
+        /// <summary>
+        /// Mapa graczy {id_gracza} {{x , y}}
+        /// </summary>
+        Dictionary<int, Tuple<int, int>> playersPositions = new Dictionary<int, Tuple<int,int>>();
         //SCORE
         #endregion
         public Game_Bomberman(Session creator) : base()
@@ -34,32 +37,37 @@ namespace game_lib
 
         //TO DO TODO TUTAJ JĘDRZEJ
         //tutaj przekazana kontrola z wątku klienta
-        public override void gameLoop(Session session)
+        public override void gameLoop()
         {
             String packageType = "";
-
+            
             while (true)
             {
-                session.ReceivePackage();
-                packageType = session.PackageArguments[0];
+                //session.ReceivePackage();
+                //packageType = session.PackageArguments[0];
 
+                //packageType = Sessions[i].PackageArguments[0];
+                foreach (Session session in this.Sessions)
+                {
+                    int id = session.id;
+                    /*if (packageType == "PLACE_BOMB")
+                    {
 
-                if (packageType == "PLACE_BOMB")
-                {
+                    }
+                    else if (packageType == "PLAYER_POSITION")
+                     {
+                         int senderId = Int32.Parse(session.PackageArguments[1]);
+                         int x = Int32.Parse(session.PackageArguments[2]);
+                         int y = Int32.Parse(session.PackageArguments[3]);
+                     }
+                     else if (packageType == "BOMB_POSITION")
+                     {
+                         int x = Int32.Parse(session.PackageArguments[1]);
+                         int y = Int32.Parse(session.PackageArguments[2]);
+                         int ttl = Int32.Parse(session.PackageArguments[3]);
+                     }*/
+                }
 
-                }
-                else if (packageType == "PLAYER_POSITION")
-                {
-                    int senderId = Int32.Parse(session.PackageArguments[1]);
-                    int x = Int32.Parse(session.PackageArguments[2]);
-                    int y = Int32.Parse(session.PackageArguments[3]);
-                }
-                else if (packageType == "BOMB_POSITION")
-                {
-                    int x = Int32.Parse(session.PackageArguments[1]);
-                    int y = Int32.Parse(session.PackageArguments[2]);
-                    int ttl = Int32.Parse(session.PackageArguments[3]);
-                }
             }
         }
 
