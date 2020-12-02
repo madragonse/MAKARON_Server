@@ -48,7 +48,18 @@ namespace game_lib
                 {
 
                 }
-
+                else if (packageType == "PLAYER_POSITION")
+                {
+                    int senderId = Int32.Parse(session.PackageArguments[1]);
+                    int x = Int32.Parse(session.PackageArguments[2]);
+                    int y = Int32.Parse(session.PackageArguments[3]);
+                }
+                else if (packageType == "BOMB_POSITION")
+                {
+                    int x = Int32.Parse(session.PackageArguments[1]);
+                    int y = Int32.Parse(session.PackageArguments[2]);
+                    int ttl = Int32.Parse(session.PackageArguments[3]);
+                }
             }
         }
 
