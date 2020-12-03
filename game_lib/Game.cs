@@ -70,6 +70,16 @@ namespace game_lib
             }
         }
 
+        public void sendTo(int receiverId, Package package)
+        {
+            this.Sessions.Find(x => x.id == receiverId).Send(package);
+        }
+
+        public void sendToExcept(int exceptId, Package package)
+        {
+            this.Sessions.Find(x => x.id != exceptId).Send(package);
+        }
+
         public abstract void Update(ulong deltaTime);
         public abstract void StartGame();
         public abstract void StopGame();
