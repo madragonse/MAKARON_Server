@@ -18,8 +18,8 @@ namespace game_lib
         /// <summary>
         /// Mapa graczy {id_gracza} {{x , y}}
         /// </summary>
-        Dictionary<int, Tuple<int, int>> playersPositions = new Dictionary<int, Tuple<int,int>>();
-        Dictionary<int, DateTime> bombs = new Dictionary<int, DateTime>();
+        List<Game_Bomberman_Player> players = new List<Game_Bomberman_Player>();
+        List<Game_Bomberman_Bomb> bombs = new List<Game_Bomberman_Bomb>();
         //SCORE
         #endregion
         public Game_Bomberman(Session creator) : base()
@@ -58,11 +58,15 @@ namespace game_lib
                         int bomb_y = Int32.Parse(session.PackageArguments[2]);
                         int bomb_ttl = Int32.Parse(session.PackageArguments[3]);
 
-                        DateTime now = DateTime.Now;
-                        DateTime explosionTime = now.AddMilliseconds(bomb_ttl);
+                        DateTime now2 = DateTime.Now;
+                        DateTime explosionTime = now2.AddMilliseconds(bomb_ttl);
 
-                        this.bombs.Add(this.bombId, explosionTime);
                         
+
+                        Game_Bomberman_Bomb bomb = new Game_Bomberman_Bomb(this.bombId, bomb_x, bomb_y, explosionTime);
+                        this.bombs.Add(bomb);
+
+
                         Bomberman_Package package = new Bomberman_Package();
                         package.SetTypeBOMB_POSITION(this.bombId, bomb_x,bomb_y);
 
@@ -76,7 +80,8 @@ namespace game_lib
                          int x = Int32.Parse(session.PackageArguments[2]);
                          int y = Int32.Parse(session.PackageArguments[3]);
 
-                        playersPositions[session.id] = new Tuple<int,int>(x,y);
+                        this.players.Find(player => player.session_id == session.id).x = x;
+                        this.players.Find(player => player.session_id == session.id).y = y;
                      }
                      else if (packageType == "BOMB_POSITION")
                      {
@@ -87,19 +92,30 @@ namespace game_lib
                 }
                 ////////////Check for bomb explosions
                 DateTime now = DateTime.Now;
-                foreach(KeyValuePair<int,DateTime> bomb in bombs)
+                foreach(Game_Bomberman_Bomb bomb in bombs)
                 {
-                    if (bomb.Value.CompareTo(now) >=0)
+                    if (bomb.explosionTime.CompareTo(now) >=0)
                     {
                         ///BOMB EXPLOSION
+                        ///
+
+                        ///Intersects with players
+                        List<Tuple<int, int>> explosionCoords = new List<Tuple<int, int>>();
+                        foreach(Game_Bomberman_Player player in players)
+                        {
+                            if(player.intersects(explosionCoords))
+                            {
+                                //SET DAMAGE TO PLAYER
+                            }
+                        }
                     }
                 }
                 ////////////Send players positions
-                foreach(KeyValuePair<int, Tuple<int, int>> player in playersPositions)
+                foreach(Game_Bomberman_Player player in players)
                 {
                     Bomberman_Package package = new Bomberman_Package();
-                    package.SetTypePLAYER_POSITION(player.Key,player.Value.Item1,player.Value.Item2);
-                    this.sendToExcept(player.Key, package);
+                    package.SetTypePLAYER_POSITION(player.session_id,player.x,player.y);
+                    this.sendToExcept(player.session_id, package);
                 }
 
             }
