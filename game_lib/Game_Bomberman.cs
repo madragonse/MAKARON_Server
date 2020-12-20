@@ -40,17 +40,19 @@ namespace game_lib
         }
 
         //TO DO TODO TUTAJ JĘDRZEJ
-        //tutaj przekazana kontrola z wątku klienta
         public override void gameLoop()
         {
             String packageType = "";
             
             while (true)
             {
-                //session.ReceivePackage();
                 foreach (Session session in this.Sessions)
                 {
                     int id = session.id;
+
+                    //gets last unpocessed package arguments into the sessions packageArguments field
+                    if (!session.GetLastUnprocessedPackageArguments()) { break; }
+
                     packageType = session.PackageArguments[0];
                     if (packageType == "PLACE_BOMB")
                     {

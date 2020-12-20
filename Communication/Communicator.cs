@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using game_lib;
 using database;
+using packages;
 
 namespace communication
 {
@@ -21,6 +22,7 @@ namespace communication
 
         #region fields
         private Session session;
+        private Communication_Package cpackage;
         private COMMUNICATION_STATE state;
         private Lobby currentLobby;
         private Game currentGame;
@@ -36,6 +38,7 @@ namespace communication
             this.session = s;
             this.currentGame = null;
             this.currentLobby = null;
+            this.cpackage = new Communication_Package();
         }
 
 
@@ -82,7 +85,7 @@ namespace communication
                     if (this.state == COMMUNICATION_STATE.GAME)
                     {
                         if (this.currentGame == null) { this.state = COMMUNICATION_STATE.SERVER; }
-                        //TODO//this.currentGame.gameLoop(this.session);
+                        GameLoop();
                         this.state = COMMUNICATION_STATE.LOBBY;
                     }
                 }
@@ -114,21 +117,21 @@ namespace communication
                 auth.AuthorizeUser(username, password);
                 Console.WriteLine("\nA user loged in [username:" + username + "]");
 
-                session.Package.SetTypeLOGIN_CONFIRM(username);
-                session.Send(session.Package);
+                cpackage.SetTypeLOGIN_CONFIRM(username);
+                session.Send(cpackage);
             }
             catch (AuthenticationException e)
             {
                 if (e.ErrorCategory == -1)
                 {
-                    session.Package.SetTypeERROR("Server malfunction: " + e);
-                    session.Send(session.Package);
+                    cpackage.SetTypeERROR("Server malfunction: " + e);
+                    session.Send(cpackage);
                     return;
                 }
                 if (e.ErrorCategory == 1)
                 {
-                    session.Package.SetTypeLOGIN_REFUSE(username, e.ToString());
-                    session.Send(session.Package);
+                    cpackage.SetTypeLOGIN_REFUSE(username, e.ToString());
+                    session.Send(cpackage);
                 }
             }
         }
@@ -147,21 +150,21 @@ namespace communication
             {
                 auth.CreateUser(username, password);
                 Console.WriteLine("\nNew account created [user:" + username + " password: " + password + "]");
-                session.Package.SetTypeSIGNUP_CONFIRM(username);
-                session.Send(session.Package);
+                cpackage.SetTypeSIGNUP_CONFIRM(username);
+                session.Send(cpackage);
             }
             catch (AuthenticationException e)
             {
                 if (e.ErrorCategory == -1)
                 {
-                    session.Package.SetTypeERROR("Server malfunction: " + e);
-                    session.Send(session.Package);
+                    cpackage.SetTypeERROR("Server malfunction: " + e);
+                    session.Send(cpackage);
                     return;
                 }
                 if (e.ErrorCategory == 1)
                 {
-                    session.Package.SetTypeSIGNUP_REFUSE(username, e.ToString());
-                    session.Send(session.Package);
+                    cpackage.SetTypeSIGNUP_REFUSE(username, e.ToString());
+                    session.Send(cpackage);
                 }
             }
            
@@ -180,8 +183,8 @@ namespace communication
             }
             catch(Exception e)
             {
-                session.Package.SetTypeJOIN_LOBBY_REFUSE(e.ToString());
-                session.Send(session.Package);
+                cpackage.SetTypeJOIN_LOBBY_REFUSE(e.ToString());
+                session.Send(cpackage);
                 return;
             }
             
@@ -196,11 +199,21 @@ namespace communication
             }
             catch (Exception e)
             {
-                session.Package.SetTypeCREATE_LOBBY_REFUSE(e.ToString());
-                session.Send(session.Package);
+                cpackage.SetTypeCREATE_LOBBY_REFUSE(e.ToString());
+                session.Send(cpackage);
                 return;
             }
 
+        }
+        private void GameLoop()
+        {
+            Package p = new Package();
+            while (true)
+            {
+              p= session.ReceivePackageAndSaveToQueue();
+              if (p.getArguments()[0] == "QUIT_GAME") { break; }  
+              //check if game hasn't "kicked the player out"
+            }
         }
 
         private void LobbyLoop()
@@ -208,8 +221,8 @@ namespace communication
             int gameID = currentLobby.LobbyLoop(this.session);
             if (gameID == -1)
             {
-                session.Package.SetTypeERROR("Lobby error?");
-                session.Send(session.Package);
+                cpackage.SetTypeERROR("Lobby error?");
+                session.Send(cpackage);
                 return;
             }
             currentGame = GameAndLobbyManager.getGame(gameID);
@@ -225,8 +238,8 @@ namespace communication
             {
                 data.Add(l.toString());
             }
-            session.Package.SetTypeLIST(data);
-            session.Send(session.Package);
+            cpackage.SetTypeLIST(data);
+            session.Send(cpackage);
         }
 
         private void SendCurrentLobbiesForChosenGame()
@@ -238,8 +251,8 @@ namespace communication
             {
                 if (l.getGameType() == game){ data.Add(l.toString());  }
             }
-            session.Package.SetTypeLIST(data);
-            session.Send(session.Package);
+            cpackage.SetTypeLIST(data);
+            session.Send(cpackage);
         }
         #endregion
     }

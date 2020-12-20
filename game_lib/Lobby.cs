@@ -71,8 +71,8 @@ namespace game_lib
 
         public uint GameID
         {
-            get => GameID;
-            set { GameID = value; }
+            get => gameID;
+            set { gameID = value; }
         } 
         #endregion
 
