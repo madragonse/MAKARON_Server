@@ -210,7 +210,7 @@ namespace communication
             Package p = new Package();
             while (true)
             {
-              p= session.ReceivePackageAndSaveToQueue();
+              p = session.ReceivePackageAndSaveToQueue();
               if (p.getArguments()[0] == "QUIT_GAME") { break; }  
               //check if game hasn't "kicked the player out"
             }

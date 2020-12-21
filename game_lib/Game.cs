@@ -84,6 +84,5 @@ namespace game_lib
         public abstract void StartGame();
         public abstract void StopGame();
         public abstract GAME_TYPE getGameType();
-        public abstract void gameLoop();
     }
 }

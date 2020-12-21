@@ -39,90 +39,6 @@ namespace game_lib
             return GAME_TYPE.BOMBERMAN;
         }
 
-        //TO DO TODO TUTAJ JĘDRZEJ
-        public override void gameLoop()
-        {
-            String packageType = "";
-            
-            while (true)
-            {
-                foreach (Session session in this.Sessions)
-                {
-                    int id = session.id;
-
-                    //gets last unpocessed package arguments into the sessions packageArguments field
-                    if (!session.GetLastUnprocessedPackageArguments()) { break; }
-
-                    packageType = session.PackageArguments[0];
-                    if (packageType == "PLACE_BOMB")
-                    {
-                        int bomb_x = Int32.Parse(session.PackageArguments[1]);
-                        int bomb_y = Int32.Parse(session.PackageArguments[2]);
-                        int bomb_ttl = Int32.Parse(session.PackageArguments[3]);
-
-                        DateTime now2 = DateTime.Now;
-                        DateTime explosionTime = now2.AddMilliseconds(bomb_ttl);
-
-                        
-
-                        Game_Bomberman_Bomb bomb = new Game_Bomberman_Bomb(this.bombId, bomb_x, bomb_y, explosionTime);
-                        this.bombs.Add(bomb);
-
-
-                        Bomberman_Package package = new Bomberman_Package();
-                        package.SetTypeBOMB_POSITION(this.bombId, bomb_x,bomb_y);
-
-                        this.sendToEveryone(package);
-
-                        this.bombId++;
-                    }
-                    else if (packageType == "PLAYER_POSITION")
-                     {
-                         int senderId = Int32.Parse(session.PackageArguments[1]);
-                         int x = Int32.Parse(session.PackageArguments[2]);
-                         int y = Int32.Parse(session.PackageArguments[3]);
-
-                        this.players.Find(player => player.session_id == session.id).x = x;
-                        this.players.Find(player => player.session_id == session.id).y = y;
-                     }
-                     else if (packageType == "BOMB_POSITION")
-                     {
-                         int x = Int32.Parse(session.PackageArguments[1]);
-                         int y = Int32.Parse(session.PackageArguments[2]);
-                         int ttl = Int32.Parse(session.PackageArguments[3]);
-                     }
-                }
-                ////////////Check for bomb explosions
-                DateTime now = DateTime.Now;
-                foreach(Game_Bomberman_Bomb bomb in bombs)
-                {
-                    if (bomb.explosionTime.CompareTo(now) >=0)
-                    {
-                        ///BOMB EXPLOSION
-                        ///
-
-                        ///Intersects with players
-                        List<Tuple<int, int>> explosionCoords = new List<Tuple<int, int>>();
-                        foreach(Game_Bomberman_Player player in players)
-                        {
-                            if(player.intersects(explosionCoords))
-                            {
-                                //SET DAMAGE TO PLAYER
-                            }
-                        }
-                    }
-                }
-                ////////////Send players positions
-                foreach(Game_Bomberman_Player player in players)
-                {
-                    Bomberman_Package package = new Bomberman_Package();
-                    package.SetTypePLAYER_POSITION(player.session_id,player.x,player.y);
-                    this.sendToExcept(player.session_id, package);
-                }
-
-            }
-        }
-
         public override void StartGame()
         {
             throw new NotImplementedException();
@@ -135,9 +51,83 @@ namespace game_lib
 
         public override void Update(ulong deltaTime)
         {
+            String packageType = "";
+
             if (this.State == GAME_STATE.IN_GAME)
             {
-                //
+                foreach (Session session in this.Sessions)
+                {
+                    int id = session.id;
+
+                    //gets last unpocessed package arguments into the sessions packageArguments field
+                    if (!session.GetLastUnprocessedPackageArguments()) { break; }
+
+                    Console.Out.WriteLine(session.ToString());
+                    packageType = session.PackageArguments[0];
+                    if (packageType == "PLACE_BOMB")
+                    {
+                        int bomb_x = Int32.Parse(session.PackageArguments[1]);
+                        int bomb_y = Int32.Parse(session.PackageArguments[2]);
+                        int bomb_ttl = Int32.Parse(session.PackageArguments[3]);
+
+                        DateTime now2 = DateTime.Now;
+                        DateTime explosionTime = now2.AddMilliseconds(bomb_ttl);
+
+
+                        Game_Bomberman_Bomb bomb = new Game_Bomberman_Bomb(this.bombId, bomb_x, bomb_y, explosionTime);
+                        this.bombs.Add(bomb);
+
+
+                        Bomberman_Package package = new Bomberman_Package();
+                        package.SetTypeBOMB_POSITION(this.bombId, bomb_x, bomb_y);
+
+                        this.sendToEveryone(package);
+
+                        this.bombId++;
+                    }
+                    else if (packageType == "PLAYER_POSITION")
+                    {
+                        int senderId = Int32.Parse(session.PackageArguments[1]);
+                        int x = Int32.Parse(session.PackageArguments[2]);
+                        int y = Int32.Parse(session.PackageArguments[3]);
+
+                        this.players.Find(player => player.session_id == session.id).x = x;
+                        this.players.Find(player => player.session_id == session.id).y = y;
+                    }
+                    else if (packageType == "BOMB_POSITION")
+                    {
+                        int x = Int32.Parse(session.PackageArguments[1]);
+                        int y = Int32.Parse(session.PackageArguments[2]);
+                        int ttl = Int32.Parse(session.PackageArguments[3]);
+                    }
+                }
+                ////////////Check for bomb explosions
+                DateTime now = DateTime.Now;
+                foreach (Game_Bomberman_Bomb bomb in bombs)
+                {
+                    if (bomb.explosionTime.CompareTo(now) >= 0)
+                    {
+                        ///BOMB EXPLOSION
+                        ///
+
+                        ///Intersects with players
+                        List<Tuple<int, int>> explosionCoords = new List<Tuple<int, int>>();
+                        foreach (Game_Bomberman_Player player in players)
+                        {
+                            if (player.intersects(explosionCoords))
+                            {
+                                //SET DAMAGE TO PLAYER
+                            }
+                        }
+                    }
+                }
+                ////////////Send players positions
+                foreach (Game_Bomberman_Player player in players)
+                {
+                    Bomberman_Package package = new Bomberman_Package();
+                    package.SetTypePLAYER_POSITION(player.session_id, player.x, player.y);
+                    this.sendToExcept(player.session_id, package);
+                }
             }
         }
     }

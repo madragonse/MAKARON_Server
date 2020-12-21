@@ -28,6 +28,17 @@ namespace game_lib
         public Queue<Package> EnquedPackages { get => enquedPackages; set => enquedPackages = value; }
         #endregion
 
+        String toString()
+        {
+            String res = "";
+            foreach(String s in packageArguments)
+            {
+                res += s;
+                res += " ";
+            }
+            return res;
+        }
+
         public Session(int id, NetworkStream stream)
         {
             Id = id;
