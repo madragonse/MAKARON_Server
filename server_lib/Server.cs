@@ -167,9 +167,9 @@ namespace server_lib
                     ulong deltaTime = 0;
                     while (this.running)
                     {
+                        sw.Restart();
                         deltaTime = (ulong) sw.ElapsedMilliseconds;
                         GameAndLobbyManager.Update(deltaTime);
-                        sw.Restart();
                         Thread.Sleep(100);
                     }
 

@@ -13,7 +13,7 @@ namespace communication
     {
         #region DEFINITIONS
         public static uint DEFAULT_PLAYER_LIMIT = 10;
-        public static ulong DEFAULT_LOBBY_WAIT_TIME = 60000; //1minute
+        public static ulong DEFAULT_LOBBY_WAIT_TIME = 6000000; //1minute
         #endregion
 
         private static Mutex lobbyListMutex = new Mutex();
@@ -59,15 +59,21 @@ namespace communication
             }     
         }
 
-        public static Lobby JoinLobby(int lobbyId, Session session)
-        {
-            if (lobbyId > lobbys.Count) { throw new Exception("Lobby index out of bounds"); }
-
+        public static Lobby JoinLobby(String lobbyId, Session session)
+        {  
             lobbyListMutex.WaitOne();
-
-            Lobby l= lobbys[lobbyId].AddPlayer(session);
+            foreach(Lobby l in lobbys)
+            {
+                if (l.Name == lobbyId)
+                {
+                    l.AddPlayer(session);
+                    lobbyListMutex.ReleaseMutex();
+                    return l;
+                }
+            }
+           
             lobbyListMutex.ReleaseMutex();
-            return l; 
+            return null; 
         }
 
         public static void Update(ulong deltaTime)

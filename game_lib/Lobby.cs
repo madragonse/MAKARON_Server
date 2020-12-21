@@ -123,7 +123,7 @@ namespace game_lib
 
                 //if waiting time runs out end lobby regardless of anything else
                 //if player limit is reached and all players are ready, end lobby
-                if (this.WaitingTime >= 0.0 || (this.getNumberOfPlayers() >= this.PlayerLimit && allPlayersReady()))
+                if (this.WaitingTime <= 0.0 || (this.getNumberOfPlayers() >= this.PlayerLimit && allPlayersReady()))
                 {
                     this.isOver = true;
                     return getAllSessions();

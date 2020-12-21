@@ -178,7 +178,9 @@ namespace communication
         {
             try
             {
-                this.currentLobby = GameAndLobbyManager.JoinLobby(Int32.Parse(session.PackageArguments[1]), session);
+                this.currentLobby = GameAndLobbyManager.JoinLobby(session.PackageArguments[1], session);
+                cpackage.SetTypeJOIN_LOBBY_CONFIRM();
+                session.Send(cpackage);
                 this.state = COMMUNICATION_STATE.LOBBY;
             }
             catch(Exception e)
