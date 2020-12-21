@@ -163,15 +163,15 @@ namespace game_lib
         {
             if (this.isOver)
             {
-                return "\n\rLobbyName: " + this.Name +
-                  "\n\rGameType: " + this.gameType.ToString() +
-                  "\n\rPlayers: " + getNumberOfPlayers() + "/" + this.PlayerLimit +
-                  "\n\rState: IN_GAME";
+                return "\n" + this.Name +
+                  "\n" + this.gameType.ToString() +
+                  "\n" + getNumberOfPlayers() + "/" + this.PlayerLimit +
+                  "\nIN_GAME";
             }
-            return "\n\rLobbyName: " + this.Name +
-                   "\n\rGameType: " + this.gameType.ToString() +
-                   "\n\rPlayers: " + getNumberOfPlayers() + "/" + this.PlayerLimit +
-                   "\n\rState: WAITING_FOR_PLAYERS";
+            return "\n" + this.Name +
+                   "\n" + this.gameType.ToString() +
+                   "\n" + getNumberOfPlayers() + "/" + this.PlayerLimit +
+                   "\nWAITING_FOR_PLAYERS";
         }
         private bool CheckIfAlreadyJoined(Session p)
         {

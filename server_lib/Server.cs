@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -158,11 +159,17 @@ namespace server_lib
         //TO DO MAKE THIS ACTUALLY GOOD
             public void GlobalUpdatingThread()
             {
-                new Thread(() =>
+             
+             new Thread(() =>
                 {
+                    Stopwatch sw;
+                    sw = Stopwatch.StartNew();
+                    ulong deltaTime = 0;
                     while (this.running)
                     {
-                        GameAndLobbyManager.Update((ulong)100);
+                        deltaTime = (ulong) sw.ElapsedMilliseconds;
+                        GameAndLobbyManager.Update(deltaTime);
+                        sw.Restart();
                         Thread.Sleep(100);
                     }
 
