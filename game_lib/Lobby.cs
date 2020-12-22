@@ -10,10 +10,14 @@ namespace game_lib
     public class Lobby
     {
 
-        public struct LobbyPlayer
+        public class LobbyPlayer
         {
+            public bool ready;
+            
             public Session Session { get; set; }
-            public bool Ready { get; set; }
+            public bool Ready { get=>ready;
+                                set {ready=value; }
+            }
 
             public void SetReady(bool b)
             {
@@ -23,7 +27,7 @@ namespace game_lib
             public LobbyPlayer(Session s)
             {
                 this.Session = s;
-                this.Ready = false;
+                this.ready = false;
             }
         } 
 
@@ -104,7 +108,7 @@ namespace game_lib
                     RemovePlayer(session);
                     return -1;
                 }
-                if (packageType == "READY")
+                if (packageType == "LOBBY_READY")
                 {
                     ToogleReady(session);
                 }
@@ -207,14 +211,16 @@ namespace game_lib
         private void ToogleReady(Session p)
         {
             playerListMutex.WaitOne();
-            foreach(LobbyPlayer s in waitingPlayers)
+            for(int i=0;i< waitingPlayers.Count; i++)
             {
-                if (s.Session==p)
+                if (waitingPlayers[i].Session.id == p.id)
                 {
-                    s.SetReady(!s.Ready);
+                    waitingPlayers[i].ready = !waitingPlayers[i].ready;
                     break;
                 }
             }
+                
+            
             playerListMutex.ReleaseMutex();
         }
         private List<Session> getAllSessions()

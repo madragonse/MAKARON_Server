@@ -47,6 +47,7 @@ namespace game_lib
             this.packageArguments = new List<String>();
             this.pingPackage = new Communication_Package();
             this.pingPackage.SetTypePING();
+            this.EnquedPackages = new Queue<Package>();
         }
 
 

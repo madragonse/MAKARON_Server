@@ -12,8 +12,9 @@ namespace communication
     public class GameAndLobbyManager
     {
         #region DEFINITIONS
-        public static uint DEFAULT_PLAYER_LIMIT = 10;
-        public static ulong DEFAULT_LOBBY_WAIT_TIME = 6000000; //1minute
+        //ZMIANA LIMITU GRACZY
+        public static uint DEFAULT_PLAYER_LIMIT = 1;
+        public static ulong DEFAULT_LOBBY_WAIT_TIME = 6000000; //10minutes
         #endregion
 
         private static Mutex lobbyListMutex = new Mutex();
@@ -59,21 +60,28 @@ namespace communication
             }     
         }
 
-        public static Lobby JoinLobby(String lobbyId, Session session)
+        public static int JoinLobby(String lobbyId, Session session)
         {  
             lobbyListMutex.WaitOne();
-            foreach(Lobby l in lobbys)
+            for(int i=0;i<lobbys.Count;i++)
             {
-                if (l.Name == lobbyId)
+                if (lobbys[i].Name == lobbyId)
                 {
-                    l.AddPlayer(session);
+                    lobbys[i].AddPlayer(session);
                     lobbyListMutex.ReleaseMutex();
-                    return l;
+                    return i;
                 }
             }
            
             lobbyListMutex.ReleaseMutex();
-            return null; 
+            return -1; 
+        }
+
+        public static void LeaveLobby(int lobbyIndex, Session session)
+        {
+            lobbyListMutex.WaitOne();
+            lobbys[lobbyIndex].RemovePlayer(session);
+            lobbyListMutex.ReleaseMutex();
         }
 
         public static void Update(ulong deltaTime)

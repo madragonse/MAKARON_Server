@@ -24,8 +24,8 @@ namespace communication
         private Session session;
         private Communication_Package cpackage;
         private COMMUNICATION_STATE state;
-        private Lobby currentLobby;
-        private Game currentGame;
+        private int currentLobbyId;
+        private int currentGameId;
         #endregion
 
         #region field_definitions
@@ -36,8 +36,8 @@ namespace communication
         public Communicator(Session s)
         {
             this.session = s;
-            this.currentGame = null;
-            this.currentLobby = null;
+            this.currentGameId = -1;
+            this.currentLobbyId = -1;
             this.cpackage = new Communication_Package();
         }
 
@@ -79,12 +79,12 @@ namespace communication
                     }
                     if (this.state == COMMUNICATION_STATE.LOBBY)
                     {
-                        if (this.currentLobby == null){ this.state = COMMUNICATION_STATE.SERVER;}
+                        if (this.currentLobbyId == -1){ this.state = COMMUNICATION_STATE.SERVER;}
                         LobbyLoop(); 
                     }
                     if (this.state == COMMUNICATION_STATE.GAME)
                     {
-                        if (this.currentGame == null) { this.state = COMMUNICATION_STATE.SERVER; }
+                        if (this.currentGameId == -1) { this.state = COMMUNICATION_STATE.SERVER; }
                         GameLoop();
                         this.state = COMMUNICATION_STATE.LOBBY;
                     }
@@ -95,6 +95,7 @@ namespace communication
                 Console.Write("\n\rPlayer " + Session.Id + " has dissconected :(");
                 this.Session = null;
                 //quit lobby or game
+                GameAndLobbyManager.LeaveLobby(this.currentLobbyId, this.session);
             }
            
         }
@@ -178,7 +179,7 @@ namespace communication
         {
             try
             {
-                this.currentLobby = GameAndLobbyManager.JoinLobby(session.PackageArguments[1], session);
+                this.currentLobbyId = GameAndLobbyManager.JoinLobby(session.PackageArguments[1], session);
                 cpackage.SetTypeJOIN_LOBBY_CONFIRM();
                 session.Send(cpackage);
                 this.state = COMMUNICATION_STATE.LOBBY;
@@ -220,14 +221,14 @@ namespace communication
 
         private void LobbyLoop()
         {
-            int gameID = currentLobby.LobbyLoop(this.session);
-            if (gameID == -1)
+            this.currentGameId = GameAndLobbyManager.lobbys[currentLobbyId].LobbyLoop(this.session);
+            if (currentGameId == -1)
             {
                 cpackage.SetTypeERROR("Lobby error?");
                 session.Send(cpackage);
                 return;
             }
-            currentGame = GameAndLobbyManager.getGame(gameID);
+           
             this.state = COMMUNICATION_STATE.GAME;
         }
 
