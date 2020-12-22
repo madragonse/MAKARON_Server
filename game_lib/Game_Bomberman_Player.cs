@@ -13,6 +13,13 @@ namespace game_lib
         public int y;
         public int hp;
 
+        public Game_Bomberman_Player(int session_id)
+        {
+            this.session_id = session_id;
+            this.x = 1;
+            this.y = 1;
+            this.hp = 2;
+        }
         public Game_Bomberman_Player(int session_id, int x, int y)
         {
             this.session_id = session_id;

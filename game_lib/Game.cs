@@ -23,8 +23,8 @@ namespace game_lib
             SOME_OTHER_GAME
         }
 
-        private List<Session> sessions;
-        private GAME_STATE state;
+        protected List<Session> sessions;
+        protected GAME_STATE state;
         #region field_definitions
         public List<Session> Sessions
         {

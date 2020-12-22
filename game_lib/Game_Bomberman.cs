@@ -22,6 +22,7 @@ namespace game_lib
         List<Game_Bomberman_Bomb> bombs = new List<Game_Bomberman_Bomb>();
         //SCORE
         #endregion
+        [Obsolete("Game_Bomberman(Session creator) is deprecated, please use Game_Bomberman() instead.")]
         public Game_Bomberman(Session creator) : base()
         {
             this.AddPlayer(creator);
@@ -31,7 +32,18 @@ namespace game_lib
 
         public Game_Bomberman() : base()
         {
-            //map = new ushort[20, 20];
+            this.State = GAME_STATE.LOBBY;
+        }
+
+        public new void AddPlayers(List<Session> players)
+        {
+            this.sessions = players;
+            foreach(Session s in this.sessions)
+            {
+                this.players.Add(new Game_Bomberman_Player(s.id));
+            }
+
+            this.setStartingPositions();
         }
 
         public override GAME_TYPE getGameType()
@@ -39,9 +51,43 @@ namespace game_lib
             return GAME_TYPE.BOMBERMAN;
         }
 
+        protected void setStartingPositions()
+        {
+            int i = 0;
+            foreach(Game_Bomberman_Player p in this.players)
+            {
+                switch(i)
+                {
+                    case 0:
+                        p.setPosition(0,0);
+                        break;
+                    case 1:
+                        p.setPosition(20, 0);
+                        break;
+                    case 2:
+                        p.setPosition(0, 20);
+                        break;
+                    case 3:
+                        p.setPosition(20, 20);
+                        break;
+                    default:
+
+                        break;
+                }
+                Bomberman_Package package = new Bomberman_Package();
+                package.SetTypePLAYER_POSITION(p.session_id, p.x, p.y);
+                this.sendToEveryone(package);
+                i++;
+            }
+        }
+
         public override void StartGame()
         {
-            throw new NotImplementedException();
+            this.State = GAME_STATE.IN_GAME;
+            Bomberman_Package package = new Bomberman_Package();
+            package.SetTypeSTART();
+            this.sendToEveryone(package);
+            this.setStartingPositions();
         }
 
         public override void StopGame()
@@ -90,7 +136,7 @@ namespace game_lib
                         int senderId = Int32.Parse(session.PackageArguments[1]);
                         int x = Int32.Parse(session.PackageArguments[2]);
                         int y = Int32.Parse(session.PackageArguments[3]);
-
+                        Console.WriteLine("player position" + x + " " + y);
                         this.players.Find(player => player.session_id == session.id).x = x;
                         this.players.Find(player => player.session_id == session.id).y = y;
                     }
