@@ -77,6 +77,7 @@ namespace communication
             return -1; 
         }
 
+        //MATEUSZ Wyrzuca exception, lobbyIndex poza zakresem
         public static void LeaveLobby(int lobbyIndex, Session session)
         {
             lobbyListMutex.WaitOne();
@@ -97,6 +98,7 @@ namespace communication
                     gameListMutex.WaitOne();
                     games[(int)l.GameID].AddPlayers(sessionsTemp);
                     games[(int)l.GameID].State = Game.GAME_STATE.IN_GAME;
+                    games[(int)l.GameID].StartGame();
                     gameListMutex.ReleaseMutex();
                 }   
             }

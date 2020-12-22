@@ -81,13 +81,32 @@ namespace game_lib
             }
         }
 
+        protected void assignIds()
+        {
+            foreach(Session s in this.sessions)
+            {
+                this.players.Add(new Game_Bomberman_Player(s.id));
+                Bomberman_Package p = new Bomberman_Package();
+
+                p.SetTypeASSIGN_ID(s.id);
+                this.sendTo(s.id, p);
+
+                p.SetTypePLAYER_INFO(s.id, s.id.ToString());
+                this.sendToExcept(s.id, p);
+
+                
+            }
+        }
+
         public override void StartGame()
         {
+            this.assignIds();
+            this.setStartingPositions();
             this.State = GAME_STATE.IN_GAME;
             Bomberman_Package package = new Bomberman_Package();
             package.SetTypeSTART();
-            this.sendToEveryone(package);
-            this.setStartingPositions();
+            this.sendToEveryone(package);  
+            
         }
 
         public override void StopGame()

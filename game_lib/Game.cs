@@ -77,7 +77,11 @@ namespace game_lib
 
         public void sendToExcept(int exceptId, Package package)
         {
-            this.Sessions.Find(x => x.id != exceptId).Send(package);
+            foreach(Session s in this.sessions)
+            {
+                if (s.id == exceptId) continue;
+                s.Send(package);
+            }
         }
 
         public abstract void Update(ulong deltaTime);
