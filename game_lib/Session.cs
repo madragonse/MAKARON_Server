@@ -55,14 +55,40 @@ namespace game_lib
         {
             Array.Clear(Buffer, 0, Buffer.Length);
             Stream.Read(Buffer, 0, Buffer.Length);
-            Package p = new Package(Buffer);
 
-            if (p.getArguments()[0] == "PING") { return p;} //ignore ping packages
+            //check if it isn't an ammalgamation on packages
+            String bufferString = Encoding.ASCII.GetString(Buffer, 0, Buffer.Length);
 
-            QueueMutex.WaitOne();
-            this.EnquedPackages.Enqueue(p);
-            QueueMutex.ReleaseMutex();
-            Console.WriteLine("RECEIVED AND ENQUEUED: " + p.XML);
+            String endingTag = "</PACKAGE>";
+            //check if there are characterts after endingTag
+            List<String> multiplePackageBuffer = new List<String>();
+            int endTagIndex = bufferString.IndexOf(endingTag);
+            while(endTagIndex < bufferString.Length && endTagIndex>=0)
+            {
+                endTagIndex += endingTag.Length;
+                multiplePackageBuffer.Add(bufferString.Substring(0, endTagIndex));
+                bufferString= bufferString.Substring(endTagIndex);
+                endTagIndex = bufferString.IndexOf(endingTag);
+            }
+
+            String t = bufferString.Substring(0, 1);
+            if (bufferString.Substring(0, 1) != "\0")
+            {
+                multiplePackageBuffer.Add(bufferString);
+            }
+
+
+            Package p= new Package();
+            foreach (String package in multiplePackageBuffer)
+            {
+                p = new Package(package);
+                if (p.getArguments()[0] == "PING") { continue; } //ignore ping packages
+                QueueMutex.WaitOne();
+                this.EnquedPackages.Enqueue(p);
+                QueueMutex.ReleaseMutex();
+                Console.WriteLine("RECEIVED AND ENQUEUED: " + p.XML);   
+            }
+           
             return p;
         }
 

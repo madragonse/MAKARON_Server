@@ -94,34 +94,27 @@ namespace game_lib
 
 
 
-        public int LobbyLoop(Session session)
-        {
-            String packageType = "";
-
-            while (!isOver)
-            {
-                session.ReceivePackage();
-                packageType = session.PackageArguments[0];
-
-                if (packageType == "QUIT")
-                {
-                    RemovePlayer(session);
-                    return -1;
-                }
-                if (packageType == "LOBBY_READY")
-                {
-                    ToogleReady(session);
-                }
-
-            }
-            return (int) this.gameID;
-        }
-
-
         public List<Session> Update(ulong deltaTime)
         {
             if (!this.isOver)
             {
+
+                foreach (LobbyPlayer session in this.waitingPlayers)
+                {
+                    int id = session.Session.id;
+
+                    //gets last unpocessed package arguments into the sessions packageArguments field
+                    if (!session.Session.GetLastUnprocessedPackageArguments()) { break; }
+
+                    Console.Out.WriteLine(session.Session.ToString());
+                    String packageType = session.Session.PackageArguments[0];
+
+                    if (packageType == "LOBBY_READY")
+                    {
+                        ToogleReady(session.Session);
+                    }
+                }
+
                 this.WaitingTime = this.WaitingTime - deltaTime;
                 CleanUpNotExistingPlayers();
 
@@ -208,7 +201,7 @@ namespace game_lib
             playerListMutex.ReleaseMutex();
             return true;
         }
-        private void ToogleReady(Session p)
+        public void ToogleReady(Session p)
         {
             playerListMutex.WaitOne();
             for(int i=0;i< waitingPlayers.Count; i++)

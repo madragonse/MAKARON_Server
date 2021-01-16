@@ -13,7 +13,7 @@ namespace communication
     {
         #region DEFINITIONS
         //ZMIANA LIMITU GRACZY
-        public static uint DEFAULT_PLAYER_LIMIT = 1;
+        public static uint DEFAULT_PLAYER_LIMIT = 2;
         public static ulong DEFAULT_LOBBY_WAIT_TIME = 6000000; //10minutes
         #endregion
 
@@ -75,6 +75,13 @@ namespace communication
            
             lobbyListMutex.ReleaseMutex();
             return -1; 
+        }
+
+        public static void ToogleReadyInLobby(int lobbyIndex, Session session)
+        {
+            lobbyListMutex.WaitOne();
+            lobbys[lobbyIndex].ToogleReady(session);
+            lobbyListMutex.ReleaseMutex();
         }
 
         //MATEUSZ Wyrzuca exception, lobbyIndex poza zakresem

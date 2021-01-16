@@ -90,7 +90,7 @@ namespace communication
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 Console.Write("\n\rPlayer " + Session.Id + " has dissconected :(");
                 this.Session = null;
@@ -221,12 +221,19 @@ namespace communication
 
         private void LobbyLoop()
         {
-            this.currentGameId = GameAndLobbyManager.lobbys[currentLobbyId].LobbyLoop(this.session);
-            if (currentGameId == -1)
+            Package p = new Package();
+            while (true)
             {
-                cpackage.SetTypeERROR("Lobby error?");
-                session.Send(cpackage);
-                return;
+                p = session.ReceivePackageAndSaveToQueue();
+                String packageType = p.getArguments()[0];
+                if (packageType == "QUIT_LOBBY") {
+                    GameAndLobbyManager.LeaveLobby(this.currentLobbyId, this.session);
+                    break;
+                }
+                if (packageType == "LOBBY_READY")
+                {
+                    GameAndLobbyManager.ToogleReadyInLobby(this.currentLobbyId, session);
+                }
             }
            
             this.state = COMMUNICATION_STATE.GAME;

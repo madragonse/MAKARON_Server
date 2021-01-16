@@ -61,7 +61,6 @@ namespace packages
             StringReader xmlStream = new StringReader(dataString);
             DataSet dataSet = new DataSet();
             dataSet.ReadXml(xmlStream);
-
             return dataSet.Tables[0];
         }
     }
