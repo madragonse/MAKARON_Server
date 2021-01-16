@@ -222,20 +222,10 @@ namespace communication
         private void LobbyLoop()
         {
             Package p = new Package();
-            while (true)
+            while (!GameAndLobbyManager.lobbys[currentLobbyId].IsOver)
             {
                 p = session.ReceivePackageAndSaveToQueue();
-                String packageType = p.getArguments()[0];
-                if (packageType == "QUIT_LOBBY") {
-                    GameAndLobbyManager.LeaveLobby(this.currentLobbyId, this.session);
-                    break;
-                }
-                if (packageType == "LOBBY_READY")
-                {
-                    GameAndLobbyManager.ToogleReadyInLobby(this.currentLobbyId, session);
-                }
             }
-           
             this.state = COMMUNICATION_STATE.GAME;
         }
 

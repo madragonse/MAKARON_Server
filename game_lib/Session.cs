@@ -19,6 +19,7 @@ namespace game_lib
         private List<String> packageArguments;
         private Queue<Package> enquedPackages;
         private Mutex QueueMutex = new Mutex();
+        private String unfinishedPackageBuffer = "";
 
         #region field_definitions
         public int Id { get => id; set=> id=value; }
@@ -60,23 +61,40 @@ namespace game_lib
             String bufferString = Encoding.ASCII.GetString(Buffer, 0, Buffer.Length);
 
             String endingTag = "</PACKAGE>";
+            String beginTag = "<PACKAGE>";
             //check if there are characterts after endingTag
             List<String> multiplePackageBuffer = new List<String>();
             int endTagIndex = bufferString.IndexOf(endingTag);
             while(endTagIndex < bufferString.Length && endTagIndex>=0)
             {
+                Console.WriteLine("PARSING MULTIPLE: "+bufferString);
                 endTagIndex += endingTag.Length;
+                Console.WriteLine("ADDING: " + bufferString.Substring(0, endTagIndex));
                 multiplePackageBuffer.Add(bufferString.Substring(0, endTagIndex));
                 bufferString= bufferString.Substring(endTagIndex);
                 endTagIndex = bufferString.IndexOf(endingTag);
             }
 
-            String t = bufferString.Substring(0, 1);
-            if (bufferString.Substring(0, 1) != "\0")
-            {
-                multiplePackageBuffer.Add(bufferString);
+            int beginTagIndex = bufferString.IndexOf(beginTag);
+            if (bufferString.Substring(0, 1) != "\0") {
+                if (beginTagIndex==0 && endTagIndex >= 0)
+                {
+                    Console.WriteLine("ADDING: " + bufferString);
+                    multiplePackageBuffer.Add(bufferString);
+                }
+                else if(endTagIndex<0)
+                {
+                    Console.WriteLine("ADDED TO UNFINISHED: " + bufferString);
+                    unfinishedPackageBuffer += bufferString;
+                }
+                else
+                {
+                    bufferString = unfinishedPackageBuffer + bufferString;
+                    Console.WriteLine("ADDING FINISHED: " + bufferString);
+                    multiplePackageBuffer.Add(bufferString);
+                }
             }
-
+            
 
             Package p= new Package();
             foreach (String package in multiplePackageBuffer)

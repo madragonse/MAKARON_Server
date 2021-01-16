@@ -41,18 +41,23 @@ namespace packages
         {
             if (XML != null)
             {
-                List<String> arguments = new List<String>();
-                //parse into datatable
-                DataTable dataTable = parseXMLIntoDataTable(XML);
-                foreach (DataRow dataRow in dataTable.Rows)
+                try
                 {
-                    foreach (var item in dataRow.ItemArray)
+                    List<String> arguments = new List<String>();
+                    //parse into datatable
+                    DataTable dataTable = parseXMLIntoDataTable(XML);
+                    foreach (DataRow dataRow in dataTable.Rows)
                     {
-                        arguments.Add((string)item);
+                        foreach (var item in dataRow.ItemArray)
+                        {
+                            arguments.Add((string)item);
+                        }
                     }
+                    return arguments;
                 }
+                catch(Exception e) { Console.WriteLine(e.GetType());}
                 //delete type from arguments list
-                return arguments;
+                return new List<String>();
             }
             else return new List<String>();
         }
