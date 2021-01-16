@@ -135,6 +135,8 @@ namespace game_lib
                         int bomb_y = Int32.Parse(session.PackageArguments[2]);
                         int bomb_ttl = Int32.Parse(session.PackageArguments[3]);
 
+                        Console.WriteLine("BOmb placed at: " + bomb_x + " " + bomb_y);
+
                         DateTime now2 = DateTime.Now;
                         DateTime explosionTime = now2.AddMilliseconds(bomb_ttl);
 
@@ -175,13 +177,17 @@ namespace game_lib
                         ///BOMB EXPLOSION
                         ///
 
+                        List<Tuple<int, int>> explosionCoords = bomb.getExplosionCoords();
+                        Bomberman_Package package = new Bomberman_Package();
+                        package.SetTypeBOMB_EXPLOSION(bomb.x,bomb.y,bomb.range);
+                        this.sendToEveryone(package.asPackage());
+                        
                         ///Intersects with players
-                        List<Tuple<int, int>> explosionCoords = new List<Tuple<int, int>>();
                         foreach (Game_Bomberman_Player player in players)
                         {
                             if (player.intersects(explosionCoords))
                             {
-                                //SET DAMAGE TO PLAYER
+                                this.killPlayer(player.session_id);
                             }
                         }
                     }
@@ -195,5 +201,13 @@ namespace game_lib
                 }
             }
         }
+    
+        void killPlayer(int player_id)
+        {
+            Bomberman_Package package = new Bomberman_Package();
+            package.SetTypeDEAD(player_id);
+            sendToEveryone(package.asPackage());
+        }
     }
 }
+
