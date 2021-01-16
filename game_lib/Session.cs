@@ -69,18 +69,18 @@ namespace game_lib
 
             if (unfinishedPackageBuffer != "")
             {
-               Console.WriteLine("ADDING UNFINISHED BIT");
+               //Console.WriteLine("ADDING UNFINISHED BIT");
                bufferString = unfinishedPackageBuffer + bufferString;
                unfinishedPackageBuffer = "";
             }
            
-            Console.WriteLine("TRYING: " + bufferString);
+            //Console.WriteLine("TRYING: " + bufferString);
           
             while (endTagIndex < bufferString.Length && endTagIndex>=0 && beginTagIndex == 0)
             {
-                Console.WriteLine("PARSING MULTIPLE: "+bufferString);
+                //Console.WriteLine("PARSING MULTIPLE: "+bufferString);
                 endTagIndex += endingTag.Length;
-                Console.WriteLine("ADDING: " + bufferString.Substring(0, endTagIndex));
+                //Console.WriteLine("ADDING: " + bufferString.Substring(0, endTagIndex));
                 multiplePackageBuffer.Add(bufferString.Substring(0, endTagIndex));
                 bufferString= bufferString.Substring(endTagIndex);
                 endTagIndex = bufferString.IndexOf(endingTag);
@@ -91,12 +91,12 @@ namespace game_lib
             if (bufferString.Substring(0, 1) != "\0") {
                 if (beginTagIndex==0 && endTagIndex >= 0)
                 {
-                    Console.WriteLine("ADDING FULL PACKAGE: " + bufferString);
+                    //Console.WriteLine("ADDING FULL PACKAGE: " + bufferString);
                     multiplePackageBuffer.Add(bufferString);
                 }
                 else if(endTagIndex<0)
                 {
-                    Console.WriteLine("ADDED TO UNFINISHED: " + bufferString);
+                    //Console.WriteLine("ADDED TO UNFINISHED: " + bufferString);
                     unfinishedPackageBuffer += bufferString;
                 }
             }
@@ -110,7 +110,7 @@ namespace game_lib
                 QueueMutex.WaitOne();
                 this.EnquedPackages.Enqueue(p);
                 QueueMutex.ReleaseMutex();
-                Console.WriteLine("RECEIVED AND ENQUEUED: " + p.XML);   
+                Console.WriteLine("RECEIVED AND ENQUEUED: " + p.XML);  
             }
            
             return p;

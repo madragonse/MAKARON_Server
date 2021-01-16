@@ -95,7 +95,9 @@ namespace communication
                 Console.Write("\n\rPlayer " + Session.Id + " has dissconected :(");
                 this.Session = null;
                 //quit lobby or game
-                GameAndLobbyManager.LeaveLobby(this.currentLobbyId, this.session);
+                if (currentLobbyId > -1)  { GameAndLobbyManager.LeaveLobby(this.currentLobbyId, this.session); }
+                //TODO quit game
+               
             }
            
         }
@@ -222,9 +224,25 @@ namespace communication
         private void LobbyLoop()
         {
             Package p = new Package();
-            while (!GameAndLobbyManager.lobbys[currentLobbyId].IsOver)
+            while (!GameAndLobbyManager.lobbys[currentLobbyId].IsOver )
             {
-                p = session.ReceivePackageAndSaveToQueue();
+                session.ReceivePackageAndSaveToQueue();
+                //gets last unpocessed package arguments into the sessions packageArguments field
+                while (session.GetLastUnprocessedPackageArguments())
+                {
+                    String packageType = session.PackageArguments[0];
+
+                    if (packageType == "LOBBY_READY")
+                    {
+                        GameAndLobbyManager.ToogleReadyInLobby(this.currentLobbyId,session);
+                        Console.WriteLine("TOOGLED PLAYER READY");
+                    }
+                    if (packageType == "QUIT_LOBBY")
+                    {
+                        GameAndLobbyManager.LeaveLobby(this.currentLobbyId, session);
+                        this.state = COMMUNICATION_STATE.SERVER;
+                    }
+                }
             }
             this.state = COMMUNICATION_STATE.GAME;
         }

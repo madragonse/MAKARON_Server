@@ -99,24 +99,8 @@ namespace game_lib
             if (!this.isOver)
             {
 
-                foreach (LobbyPlayer session in this.waitingPlayers)
-                {
-                    int id = session.Session.id;
-
-                    //gets last unpocessed package arguments into the sessions packageArguments field
-                    if (!session.Session.GetLastUnprocessedPackageArguments()) { break; }
-
-                    Console.Out.WriteLine(session.Session.ToString());
-                    String packageType = session.Session.PackageArguments[0];
-
-                    if (packageType == "LOBBY_READY")
-                    {
-                        ToogleReady(session.Session);
-                    }
-                }
-
                 this.WaitingTime = this.WaitingTime - deltaTime;
-                CleanUpNotExistingPlayers();
+                //CleanUpNotExistingPlayers();
 
                 //if waiting time runs out end lobby regardless of anything else
                 //if player limit is reached and all players are ready, end lobby
