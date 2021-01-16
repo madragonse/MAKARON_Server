@@ -8,6 +8,13 @@ namespace packages
 {
     public class Bomberman_Package : Package
     {
+
+        public Package asPackage()
+        {
+            Package p = new Package(this.XML);
+            return p;
+        }
+
         /// <summary>
         /// Wysyłane przez serwer, ustala id mapy
         /// </summary>
@@ -126,6 +133,27 @@ namespace packages
             this.XML = "<PACKAGE>";
             this.XML += "<type>DEAD</type>";
             this.XML += "<arg1>" + id + "</arg1>";
+            this.XML += "</PACKAGE>";
+        }
+        public void SetTypeASSIGN_ID(int id)
+        {
+            this.XML = "<PACKAGE>";
+            this.XML += "<type>ASSIGN_ID</type>";
+            this.XML += "<arg1>" + id + "</arg1>";
+            this.XML += "</PACKAGE>";
+        }
+        public void SetTypeSTART()
+        {
+            this.XML = "<PACKAGE>";
+            this.XML += "<type>START</type>";
+            this.XML += "</PACKAGE>";
+        }
+        public void SetTypePLAYER_INFO(int id,String sid)
+        {
+            this.XML = "<PACKAGE>";
+            this.XML += "<type>ASSIGN_ID</type>";
+            this.XML += "<arg1>" + id + "</arg1>";
+            this.XML += "<arg2>" + sid + "</arg2>";
             this.XML += "</PACKAGE>";
         }
     }

@@ -13,6 +13,12 @@ namespace packages
         public String XML = null;
 
         #region ctors
+
+        public Package(String s)
+        {
+            this.XML = s;
+        }
+
         public Package(byte[] data)
         {
             this.XML = Encoding.ASCII.GetString(data, 0, data.Length);
