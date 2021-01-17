@@ -216,7 +216,6 @@ namespace communication
             while (true)
             {
               p = session.ReceivePackageAndSaveToQueue();
-              if (p.getArguments()[0] == "QUIT_GAME") { break; }  
               //check if game hasn't "kicked the player out"
             }
         }
