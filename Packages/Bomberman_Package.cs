@@ -56,7 +56,7 @@ namespace packages
         /// <param name="id">id gracza</param>
         /// <param name="x">pozycja x</param>
         /// <param name="y">pozycja y</param>
-        public void SetTypePLAYER_POSITION(int id, int x, int y)
+        public void SetTypePLAYER_POSITION(int id, float x, float y)
         {
             this.XML = "<PACKAGE>";
             this.XML += "<type>PLAYER_POSITION</type>";

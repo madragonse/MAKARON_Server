@@ -59,16 +59,16 @@ namespace game_lib
                 switch(i)
                 {
                     case 0:
-                        p.setPosition(0,0);
+                        p.setPosition(1.5f, 1.5f);
                         break;
                     case 1:
-                        p.setPosition(20, 0);
+                        p.setPosition(13.5f, 13.5f);
                         break;
                     case 2:
-                        p.setPosition(0, 20);
+                        p.setPosition(1.5f, 13.5f);
                         break;
                     case 3:
-                        p.setPosition(20, 20);
+                        p.setPosition(13.5f, 1.5f);
                         break;
                     default:
 
@@ -155,11 +155,10 @@ namespace game_lib
                     else if (packageType == "PLAYER_POSITION")
                     {
                         int senderId = Int32.Parse(session.PackageArguments[1]);
-                        int x = Int32.Parse(session.PackageArguments[2]);
-                        int y = Int32.Parse(session.PackageArguments[3]);
+                        float x = float.Parse(session.PackageArguments[2]);
+                        float y = float.Parse(session.PackageArguments[3]);
                         Console.WriteLine("player position" + x + " " + y);
-                        this.players.Find(player => player.session_id == session.id).x = x;
-                        this.players.Find(player => player.session_id == session.id).y = y;
+                        this.players.Find(player => player.session_id == senderId).setPosition(x, y);
                     }
                     else if (packageType == "BOMB_POSITION")
                     {

@@ -9,8 +9,8 @@ namespace game_lib
     class Game_Bomberman_Player
     {
         public int session_id;
-        public int x;
-        public int y;
+        public float x;
+        public float y;
         public int hp;
 
         public Game_Bomberman_Player(int session_id)
@@ -35,7 +35,7 @@ namespace game_lib
             this.hp = hp;
         }
 
-        public void setPosition(int x, int y)
+        public void setPosition(float x, float y)
         {
             this.x = x;
             this.y = y;
