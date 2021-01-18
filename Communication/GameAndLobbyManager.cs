@@ -13,7 +13,7 @@ namespace communication
     {
         #region DEFINITIONS
         //ZMIANA LIMITU GRACZY
-        public static uint DEFAULT_PLAYER_LIMIT = 1;
+        public static uint DEFAULT_PLAYER_LIMIT = 2;
         public static ulong DEFAULT_LOBBY_WAIT_TIME = 6000000; //10minutes
         #endregion
 
@@ -120,9 +120,13 @@ namespace communication
             lobbyListMutex.ReleaseMutex();
 
             gameListMutex.WaitOne();
-            foreach (game_lib.Game g in games)
+            for (int i = 0; i < games.Count; i++)
             {
-                g.Update(deltaTime);
+                if(games[i].Update(deltaTime))
+                {
+                    //game ended
+                    games.RemoveAt(i);
+                }
             }
             gameListMutex.ReleaseMutex();
         }

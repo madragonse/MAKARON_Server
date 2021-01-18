@@ -17,6 +17,8 @@ namespace game_lib
         //TO DO TODO chyba jednak nie ushort
         //ushort[,] map;
         System.Timers.Timer aTimer = new System.Timers.Timer();
+        DateTime last_message_time;
+        Boolean game_ended;
         
 
         int bombId = 0;
@@ -45,6 +47,8 @@ namespace game_lib
             aTimer.Interval = 1000;
             aTimer.Enabled = true;
 
+            this.last_message_time = DateTime.Now;
+            this.game_ended = false;
             this.State = GAME_STATE.LOBBY;
         }
 
@@ -106,8 +110,6 @@ namespace game_lib
 
                 p.SetTypePLAYER_INFO(s.id, s.id.ToString());
                 this.sendToExcept(s.id, p);
-
-                
             }
         }
 
@@ -134,7 +136,7 @@ namespace game_lib
                 Console.WriteLine(player.session_id.ToString() + " " +player.x.ToString()+ " " +player.y.ToString());
             }
         }
-        public override void Update(ulong deltaTime)
+        public override Boolean Update(ulong deltaTime)
         {
             String packageType = "";
 
@@ -147,6 +149,8 @@ namespace game_lib
                     //gets last unpocessed package arguments into the sessions packageArguments field
                     while (session.GetLastUnprocessedPackageArguments())
                     {
+                        this.last_message_time = DateTime.Now;
+
                         packageType = session.PackageArguments[0];
                         if (packageType == "PLACE_BOMB")
                         {
@@ -177,15 +181,15 @@ namespace game_lib
                             int senderId = Int32.Parse(session.PackageArguments[1]);
                             float x = float.Parse(session.PackageArguments[2]);
                             float y = float.Parse(session.PackageArguments[3]);
-                            this.players.Find(player => player.session_id == senderId).setPosition(x, y);
+
+                            foreach(Game_Bomberman_Player p in this.players)
+                            {
+                                if(p.session_id == senderId)
+                                {
+                                    p.setPosition(x,y);
+                                }
+                            }
                             //Console.WriteLine("------" + session.PackageArguments[2].ToString() + " " + session.PackageArguments[3].ToString());
-                        }
-                        else if (packageType == "BOMB_POSITION")
-                        {
-                            //Serwer tworzy tą paczkę
-                            /*int x = Int32.Parse(session.PackageArguments[1]);
-                            int y = Int32.Parse(session.PackageArguments[2]);
-                            int ttl = Int32.Parse(session.PackageArguments[3]);*/
                         }
                     }
                 }
@@ -224,14 +228,37 @@ namespace game_lib
                     package.SetTypePLAYER_POSITION(player.session_id, player.x, player.y);
                     this.sendToExcept(player.session_id, package);
                 }
+                //Check if players are still in game
+                //if (now.CompareTo(this.last_message_time.AddSeconds(2)) >= 0) return true;
             }
+            return this.game_ended;
         }
     
+        private void endgame()
+        {
+            this.game_ended = true;
+        }
         void killPlayer(int player_id)
         {
+            int died_players = 0;
+            foreach(Game_Bomberman_Player p in this.players)
+            {
+                if(p.session_id == player_id)p.hp = 0;
+                if (p.hp == 0) died_players++;
+            }
+            if(died_players-1 == players.Count)
+            {
+                endgame();
+            }
+
             Bomberman_Package package = new Bomberman_Package();
             package.SetTypeDEAD(player_id);
             sendToEveryone(package.asPackage());
+
+            if (died_players >= players.Count-1)
+            {
+                endgame();
+            }
         }
     }
 }

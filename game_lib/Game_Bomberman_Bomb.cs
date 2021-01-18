@@ -19,7 +19,7 @@ namespace game_lib
             this.id = id;
             this.x = x;
             this.y = y;
-            this.range = 1;
+            this.range = 2;
             this.explosionTime = explosionTime;
         }
 
@@ -36,14 +36,15 @@ namespace game_lib
         {
             List<Tuple<int, int>> temp = new List<Tuple<int, int>>();
 
-            for(int i = this.x - range; i<this.x+range;i++)
+            for (int i = (int)(this.x - this.range); i <= (this.x + this.range); i++)
             {
-                if (i < 0) continue;
+                if (i < 1 || i > 13) continue;
                 temp.Add(new Tuple<int, int>(i, this.y));
             }
-            for (int i = this.y - range; i < this.y + range; i++)
+            for (int i = (int)(this.y - this.range); i <= (this.y + this.range); i++)
             {
-                if (i < 0) continue;
+                if (i < 1 || i > 13) continue;
+                if (i == this.y) continue;
                 temp.Add(new Tuple<int, int>(this.x, i));
             }
             return temp;

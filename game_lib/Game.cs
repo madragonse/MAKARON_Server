@@ -84,7 +84,7 @@ namespace game_lib
             }
         }
 
-        public abstract void Update(ulong deltaTime);
+        public abstract Boolean Update(ulong deltaTime);
         public abstract void StartGame();
         public abstract void StopGame();
         public abstract GAME_TYPE getGameType();

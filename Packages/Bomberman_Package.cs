@@ -152,7 +152,7 @@ namespace packages
         public void SetTypePLAYER_INFO(int id,String sid)
         {
             this.XML = "<PACKAGE>";
-            this.XML += "<type>ASSIGN_ID</type>";
+            this.XML += "<type>PLAYER_INFO</type>";
             this.XML += "<arg1>" + id + "</arg1>";
             this.XML += "<arg2>" + sid + "</arg2>";
             this.XML += "</PACKAGE>";

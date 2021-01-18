@@ -43,8 +43,7 @@ namespace game_lib
 
         public bool intersects(int x, int y)
         {
-            if (this.x == x && this.y == y) return true;
-            return false;
+            return (int)this.x == x && (int)this.y == y;
         }
         public bool intersects(List<Tuple<int,int>> coords)
         {
