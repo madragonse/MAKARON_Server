@@ -118,7 +118,7 @@ namespace game_lib
                 QueueMutex.WaitOne();
                 this.EnquedPackages.Enqueue(p);
                 QueueMutex.ReleaseMutex();
-                Console.WriteLine("RECEIVED AND ENQUEUED: " + p.XML);  
+                //Console.WriteLine("RECEIVED AND ENQUEUED: " + p.XML);  
             }
            
             return p;
@@ -131,6 +131,7 @@ namespace game_lib
         /// <returns>True if there was an unporccessed package, false if there wasn't</returns>
         public Boolean GetLastUnprocessedPackageArguments()
         {
+            Console.WriteLine(this.enquedPackages.Count().ToString());
             QueueMutex.WaitOne();
             if (EnquedPackages.Any())
             {
@@ -152,7 +153,7 @@ namespace game_lib
             //get arguments
             this.packageArguments = p.getArguments();
             //debuging
-            Console.WriteLine("RECEIVED: "+p.XML);
+            //Console.WriteLine("RECEIVED: "+p.XML);
         }
 
         public void Send(byte [] data)

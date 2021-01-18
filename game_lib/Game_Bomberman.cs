@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using packages;
+using System.Timers;
+using System.Diagnostics;
 
 namespace game_lib
 {
@@ -14,6 +16,9 @@ namespace game_lib
         #region fields
         //TO DO TODO chyba jednak nie ushort
         //ushort[,] map;
+        System.Timers.Timer aTimer = new System.Timers.Timer();
+        
+
         int bombId = 0;
         /// <summary>
         /// Mapa graczy {id_gracza} {{x , y}}
@@ -25,6 +30,10 @@ namespace game_lib
         [Obsolete("Game_Bomberman(Session creator) is deprecated, please use Game_Bomberman() instead.")]
         public Game_Bomberman(Session creator) : base()
         {
+            aTimer.Elapsed += new ElapsedEventHandler(PrintPlayersPositions);
+            aTimer.Interval = 1000;
+            aTimer.Enabled = true;
+
             this.AddPlayer(creator);
             this.State = GAME_STATE.LOBBY;
         }
@@ -32,6 +41,10 @@ namespace game_lib
 
         public Game_Bomberman() : base()
         {
+            aTimer.Elapsed += new ElapsedEventHandler(PrintPlayersPositions);
+            aTimer.Interval = 1000;
+            aTimer.Enabled = true;
+
             this.State = GAME_STATE.LOBBY;
         }
 
@@ -114,6 +127,13 @@ namespace game_lib
             throw new NotImplementedException();
         }
 
+        public void PrintPlayersPositions(object source, ElapsedEventArgs e)
+        {
+            foreach(Game_Bomberman_Player player in this.players)
+            {
+                Console.WriteLine(player.session_id.ToString() + " " +player.x.ToString()+ " " +player.y.ToString());
+            }
+        }
         public override void Update(ulong deltaTime)
         {
             String packageType = "";
@@ -125,46 +145,46 @@ namespace game_lib
                     int id = session.id;
 
                     //gets last unpocessed package arguments into the sessions packageArguments field
-                    if (!session.GetLastUnprocessedPackageArguments()) { break; }
-
-                    Console.Out.WriteLine(session.ToString());
-                    packageType = session.PackageArguments[0];
-                    if (packageType == "PLACE_BOMB")
+                    while (session.GetLastUnprocessedPackageArguments())
                     {
-                        int bomb_x = Int32.Parse(session.PackageArguments[1]);
-                        int bomb_y = Int32.Parse(session.PackageArguments[2]);
-                        int bomb_ttl = Int32.Parse(session.PackageArguments[3]);
+                        packageType = session.PackageArguments[0];
+                        if (packageType == "PLACE_BOMB")
+                        {
+                            int bomb_x = Int32.Parse(session.PackageArguments[1]);
+                            int bomb_y = Int32.Parse(session.PackageArguments[2]);
+                            int bomb_ttl = Int32.Parse(session.PackageArguments[3]);
 
-                        Console.WriteLine("BOmb placed at: " + bomb_x + " " + bomb_y);
+                            Console.WriteLine("Bomb placed at: " + bomb_x + " " + bomb_y);
 
-                        DateTime now2 = DateTime.Now;
-                        DateTime explosionTime = now2.AddMilliseconds(bomb_ttl);
-
-
-                        Game_Bomberman_Bomb bomb = new Game_Bomberman_Bomb(this.bombId, bomb_x, bomb_y, explosionTime);
-                        this.bombs.Add(bomb);
+                            DateTime now2 = DateTime.Now;
+                            DateTime explosionTime = now2.AddMilliseconds(bomb_ttl);
 
 
-                        Bomberman_Package package = new Bomberman_Package();
-                        package.SetTypeBOMB_POSITION(this.bombId, bomb_x, bomb_y);
+                            Game_Bomberman_Bomb bomb = new Game_Bomberman_Bomb(this.bombId, bomb_x, bomb_y, explosionTime);
+                            this.bombs.Add(bomb);
 
-                        this.sendToEveryone(package);
 
-                        this.bombId++;
-                    }
-                    else if (packageType == "PLAYER_POSITION")
-                    {
-                        int senderId = Int32.Parse(session.PackageArguments[1]);
-                        float x = float.Parse(session.PackageArguments[2]);
-                        float y = float.Parse(session.PackageArguments[3]);
-                        Console.WriteLine("player position" + x + " " + y);
-                        this.players.Find(player => player.session_id == senderId).setPosition(x, y);
-                    }
-                    else if (packageType == "BOMB_POSITION")
-                    {
-                        int x = Int32.Parse(session.PackageArguments[1]);
-                        int y = Int32.Parse(session.PackageArguments[2]);
-                        int ttl = Int32.Parse(session.PackageArguments[3]);
+                            Bomberman_Package package = new Bomberman_Package();
+                            package.SetTypeBOMB_POSITION(this.bombId, bomb_x, bomb_y);
+
+                            this.sendToEveryone(package);
+
+                            this.bombId++;
+                        }
+                        else if (packageType == "PLAYER_POSITION")
+                        {
+                            int senderId = Int32.Parse(session.PackageArguments[1]);
+                            float x = float.Parse(session.PackageArguments[2]);
+                            float y = float.Parse(session.PackageArguments[3]);
+                            this.players.Find(player => player.session_id == senderId).setPosition(x, y);
+                            Console.WriteLine("------" + session.PackageArguments[2].ToString() + " " + session.PackageArguments[3].ToString());
+                        }
+                        else if (packageType == "BOMB_POSITION")
+                        {
+                            int x = Int32.Parse(session.PackageArguments[1]);
+                            int y = Int32.Parse(session.PackageArguments[2]);
+                            int ttl = Int32.Parse(session.PackageArguments[3]);
+                        }
                     }
                 }
                 ////////////Check for bomb explosions
