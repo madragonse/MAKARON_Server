@@ -29,6 +29,14 @@ namespace communication
         }
         public static void CreateLobby(String roomName,uint playerLimit,ulong waitTime, Game.GAME_TYPE game)
         {
+            //check if lobby name is unique
+            lobbyListMutex.WaitOne();
+            foreach (Lobby l in lobbys)
+            {
+                if (l.Name == roomName) { throw new Exception("Nazwa lobby zajeta!"); }
+            }
+            lobbyListMutex.ReleaseMutex();
+            
             Game tempG;
             switch (game)
             {

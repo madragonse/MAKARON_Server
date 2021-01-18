@@ -188,6 +188,11 @@ namespace packages
         this.XML += "<arg1>" + reason + "</arg1>";
         this.XML += "</PACKAGE>";
     }
-
+        public void SetTypeCREATE_LOBBY_CONFIRM()
+        {
+            this.XML = "<PACKAGE>";
+            this.XML += "<type>CREATE_LOBBY_CONFIRM</type>";
+            this.XML += "</PACKAGE>";
+        }
     }
 }

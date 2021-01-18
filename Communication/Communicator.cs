@@ -46,6 +46,7 @@ namespace communication
         {
             //set session timeout for 5seconds
             this.Session.Stream.ReadTimeout = 5000;
+            
 
             String packageType = "";
             this.state = COMMUNICATION_STATE.LOGIN_SIGNUP;
@@ -67,7 +68,7 @@ namespace communication
                             if (packageType == "LOGIN_AS_GUEST") { LogInAsGuest(); }
                             if (packageType == "REQUEST_LOBBY_LIST")
                             {
-                                //DEBUG
+                                //TEST LOBBY
                                 GameAndLobbyManager.CreateLobby("LOBBY FOR " + session.userName, Game.GAME_TYPE.BOMBERMAN);
                                 SendCurrentLobbies();
                                 this.state = COMMUNICATION_STATE.SERVER;
@@ -213,12 +214,15 @@ namespace communication
         {
             try
             {
-                game_lib.Game.GAME_TYPE game = (game_lib.Game.GAME_TYPE)Enum.Parse(typeof(game_lib.Game.GAME_TYPE), session.PackageArguments[2]);
-                GameAndLobbyManager.CreateLobby(session.PackageArguments[1], game);
+                game_lib.Game.GAME_TYPE game = (game_lib.Game.GAME_TYPE)Enum.Parse(typeof(game_lib.Game.GAME_TYPE), session.PackageArguments[1]);
+                GameAndLobbyManager.CreateLobby(session.PackageArguments[2], game);
+
+                cpackage.SetTypeCREATE_LOBBY_CONFIRM();
+                session.Send(cpackage);
             }
             catch (Exception e)
             {
-                cpackage.SetTypeCREATE_LOBBY_REFUSE(e.ToString());
+                cpackage.SetTypeCREATE_LOBBY_REFUSE(e.Message);
                 session.Send(cpackage);
                 return;
             }
