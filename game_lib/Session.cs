@@ -92,7 +92,7 @@ namespace game_lib
             }
 
            
-            if (bufferString.Substring(0, 1) != "\0") {
+            if (bufferString.Length>0 && bufferString.Substring(0, 1) != "\0") {
                 if (beginTagIndex==0 && endTagIndex >= 0)
                 {
                     //Console.WriteLine("ADDING FULL PACKAGE: " + bufferString);
@@ -111,14 +111,12 @@ namespace game_lib
             {
                 p = new Package(package);
                 List<String> args = p.getArguments();
-                if (args.Count == 0) {
-                    continue;
-                }
+                if (args.Count == 0) {continue; }
                 if ( args[0] == "PING") { continue; } //ignore ping packages
                 QueueMutex.WaitOne();
                 this.EnquedPackages.Enqueue(p);
                 QueueMutex.ReleaseMutex();
-                Console.WriteLine("RECEIVED AND ENQUEUED: " + p.XML);  
+                if (args[0] != "PLAYER_POSITION") { Console.WriteLine("RECEIVED AND ENQUEUED: " + p.XML); }
             }
            
             return p;
