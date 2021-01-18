@@ -129,7 +129,7 @@ namespace game_lib
         /// <returns>True if there was an unporccessed package, false if there wasn't</returns>
         public Boolean GetLastUnprocessedPackageArguments()
         {
-            Console.WriteLine(this.enquedPackages.Count().ToString());
+            //Console.WriteLine(this.enquedPackages.Count().ToString());
             QueueMutex.WaitOne();
             if (EnquedPackages.Any())
             {

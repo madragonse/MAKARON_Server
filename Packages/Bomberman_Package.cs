@@ -86,13 +86,14 @@ namespace packages
         /// <param name="x">pozycja x</param>
         /// <param name="y">pozycja y</param>
         /// <param name="range">zasięg wybuchu</param>
-        public void SetTypeBOMB_EXPLOSION(int x, int y, int range)
+        public void SetTypeBOMB_EXPLOSION(int id, int x, int y, int range)
         {
             this.XML = "<PACKAGE>";
             this.XML += "<type>BOMB_EXPLOSION</type>";
-            this.XML += "<arg1>" + x + "</arg1>";
-            this.XML += "<arg2>" + y + "</arg2>";
-            this.XML += "<arg3>" + range + "</arg3>";
+            this.XML += "<arg1>" + id + "</arg1>";
+            this.XML += "<arg2>" + x + "</arg2>";
+            this.XML += "<arg3>" + y + "</arg3>";
+            this.XML += "<arg4>" + range + "</arg4>";
             this.XML += "</PACKAGE>";
         }
 

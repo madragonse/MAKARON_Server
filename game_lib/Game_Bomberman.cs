@@ -154,10 +154,12 @@ namespace game_lib
                             int bomb_y = Int32.Parse(session.PackageArguments[2]);
                             int bomb_ttl = Int32.Parse(session.PackageArguments[3]);
 
-                            Console.WriteLine("Bomb placed at: " + bomb_x + " " + bomb_y);
+                            Console.WriteLine("Bomb placed at: " + bomb_x + " " + bomb_y + " with detonator set for " + bomb_ttl.ToString() + "ms");
 
                             DateTime now2 = DateTime.Now;
                             DateTime explosionTime = now2.AddMilliseconds(bomb_ttl);
+                            //Console.WriteLine(now2.ToString("G"));
+                            //Console.WriteLine(explosionTime.ToString("G"));
 
 
                             Game_Bomberman_Bomb bomb = new Game_Bomberman_Bomb(this.bombId, bomb_x, bomb_y, explosionTime);
@@ -166,7 +168,6 @@ namespace game_lib
 
                             Bomberman_Package package = new Bomberman_Package();
                             package.SetTypeBOMB_POSITION(this.bombId, bomb_x, bomb_y);
-
                             this.sendToEveryone(package);
 
                             this.bombId++;
@@ -177,30 +178,32 @@ namespace game_lib
                             float x = float.Parse(session.PackageArguments[2]);
                             float y = float.Parse(session.PackageArguments[3]);
                             this.players.Find(player => player.session_id == senderId).setPosition(x, y);
-                            Console.WriteLine("------" + session.PackageArguments[2].ToString() + " " + session.PackageArguments[3].ToString());
+                            //Console.WriteLine("------" + session.PackageArguments[2].ToString() + " " + session.PackageArguments[3].ToString());
                         }
                         else if (packageType == "BOMB_POSITION")
                         {
-                            int x = Int32.Parse(session.PackageArguments[1]);
+                            //Serwer tworzy tą paczkę
+                            /*int x = Int32.Parse(session.PackageArguments[1]);
                             int y = Int32.Parse(session.PackageArguments[2]);
-                            int ttl = Int32.Parse(session.PackageArguments[3]);
+                            int ttl = Int32.Parse(session.PackageArguments[3]);*/
                         }
                     }
                 }
                 ////////////Check for bomb explosions
                 DateTime now = DateTime.Now;
+                int bomb_to_delete = -1;
                 foreach (Game_Bomberman_Bomb bomb in bombs)
                 {
-                    if (bomb.explosionTime.CompareTo(now) >= 0)
+                    if (now.CompareTo(bomb.explosionTime) >= 0)
                     {
                         ///BOMB EXPLOSION
                         ///
 
-                        List<Tuple<int, int>> explosionCoords = bomb.getExplosionCoords();
                         Bomberman_Package package = new Bomberman_Package();
-                        package.SetTypeBOMB_EXPLOSION(bomb.x,bomb.y,bomb.range);
+                        package.SetTypeBOMB_EXPLOSION(bomb.id, bomb.x, bomb.y, bomb.range);
                         this.sendToEveryone(package.asPackage());
-                        
+
+                        List<Tuple<int, int>> explosionCoords = bomb.getExplosionCoords();
                         ///Intersects with players
                         foreach (Game_Bomberman_Player player in players)
                         {
@@ -209,8 +212,11 @@ namespace game_lib
                                 this.killPlayer(player.session_id);
                             }
                         }
-                    }
+                        bomb_to_delete = bomb.id;
+                        break;
+                    } 
                 }
+                if (bomb_to_delete >= 0) this.bombs.RemoveAll(i => i.id == bomb_to_delete);
                 ////////////Send players positions
                 foreach (Game_Bomberman_Player player in players)
                 {
