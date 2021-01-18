@@ -67,7 +67,14 @@ namespace packages
         this.XML += "</PACKAGE>";
     }
 
-    public void SetTypeLOGIN_CONFIRM(String username)
+    public void SetTypeLOGIN_AG_GUEST()
+    {
+        this.XML = "<PACKAGE>";
+        this.XML += "<type>LOGIN_AG_GUEST</type>";
+        this.XML += "</PACKAGE>";
+    }
+
+        public void SetTypeLOGIN_CONFIRM(String username)
     {
         this.XML = "<PACKAGE>";
         this.XML += "<type>LOGIN_CONFIRM</type><arg1>" + username + "</arg1>";

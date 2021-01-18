@@ -53,40 +53,44 @@ namespace communication
             {
                 while (true)
                 {
-                    session.ReceivePackage();
-                    packageType = session.PackageArguments[0];
-
-                    if (packageType == "PING") { continue; } //ignore ping packages
-
-                    if (this.state == COMMUNICATION_STATE.LOGIN_SIGNUP)
+                    session.ReceivePackageAndSaveToQueue();
+                    //gets last unpocessed package arguments into the sessions packageArguments field
+                    while (session.GetLastUnprocessedPackageArguments())
                     {
-                        if (packageType == "SIGNUP") { SignUp(); }
-                        if (packageType == "LOGIN") { LogIn(); }
-                        if (packageType == "REQUEST_LOBBY_LIST")
+                        packageType = session.PackageArguments[0];
+                        if (packageType == "PING") { continue; } //ignore ping packages
+
+                        if (this.state == COMMUNICATION_STATE.LOGIN_SIGNUP)
                         {
-                            //DEBUG
-                            GameAndLobbyManager.CreateLobby("LOBBY FOR PLAYER "+session.Id.ToString(), Game.GAME_TYPE.BOMBERMAN);
-                            SendCurrentLobbies();
-                            this.state = COMMUNICATION_STATE.SERVER;
+                            if (packageType == "SIGNUP") { SignUp(); }
+                            if (packageType == "LOGIN") { LogIn(); }
+                            if (packageType == "LOGIN_AS_GUEST") { LogInAsGuest(); }
+                            if (packageType == "REQUEST_LOBBY_LIST")
+                            {
+                                //DEBUG
+                                GameAndLobbyManager.CreateLobby("LOBBY FOR " + session.userName, Game.GAME_TYPE.BOMBERMAN);
+                                SendCurrentLobbies();
+                                this.state = COMMUNICATION_STATE.SERVER;
+                            }
                         }
-                    }
-                    if (this.state == COMMUNICATION_STATE.SERVER)
-                    {
-                        if (packageType == "CREATE_LOBBY") { CreateLobby(); }
-                        if (packageType == "JOIN_LOBBY") { JoinLobby();  }
-                        if (packageType == "REQUEST_LOBBY_LIST") { SendCurrentLobbies();}
-                        if (packageType == "REQUEST_LOBBY_LIST_ARG") { SendCurrentLobbiesForChosenGame(); }
-                    }
-                    if (this.state == COMMUNICATION_STATE.LOBBY)
-                    {
-                        if (this.currentLobbyId == -1){ this.state = COMMUNICATION_STATE.SERVER;}
-                        LobbyLoop(); 
-                    }
-                    if (this.state == COMMUNICATION_STATE.GAME)
-                    {
-                        if (this.currentGameId == -1) { this.state = COMMUNICATION_STATE.SERVER; }
-                        GameLoop();
-                        this.state = COMMUNICATION_STATE.LOBBY;
+                        if (this.state == COMMUNICATION_STATE.SERVER)
+                        {
+                            if (packageType == "CREATE_LOBBY") { CreateLobby(); }
+                            if (packageType == "JOIN_LOBBY") { JoinLobby(); }
+                            if (packageType == "REQUEST_LOBBY_LIST") { SendCurrentLobbies(); }
+                            if (packageType == "REQUEST_LOBBY_LIST_ARG") { SendCurrentLobbiesForChosenGame(); }
+                        }
+                        if (this.state == COMMUNICATION_STATE.LOBBY)
+                        {
+                            if (this.currentLobbyId == -1) { this.state = COMMUNICATION_STATE.SERVER; }
+                            LobbyLoop();
+                        }
+                        if (this.state == COMMUNICATION_STATE.GAME)
+                        {
+                            if (this.currentGameId == -1) { this.state = COMMUNICATION_STATE.SERVER; }
+                            GameLoop();
+                            this.state = COMMUNICATION_STATE.LOBBY;
+                        }
                     }
                 }
             }
@@ -119,7 +123,7 @@ namespace communication
                 password = session.PackageArguments[2];
                 auth.AuthorizeUser(username, password);
                 Console.WriteLine("\nA user loged in [username:" + username + "]");
-
+                session.userName = username;
                 cpackage.SetTypeLOGIN_CONFIRM(username);
                 session.Send(cpackage);
             }
@@ -139,12 +143,22 @@ namespace communication
             }
         }
 
-        /// <summary>
-        /// Allows user to create a new account.
-        /// </summary>
-        /// <param  Client structure="client"></param>
-        public void SignUp()
-        {
+
+            public void LogInAsGuest()
+            {
+                session.userName = "Guest" + session.Id; ;
+                Console.WriteLine("\nA guest loged in [guestName: "+ session.userName + "]");
+
+                cpackage.SetTypeLOGIN_CONFIRM(session.userName);
+                session.Send(cpackage);
+            }
+
+            /// <summary>
+            /// Allows user to create a new account.
+            /// </summary>
+            /// <param  Client structure="client"></param>
+            public void SignUp()
+            {
             Authentication auth = new Authentication();
             String username = session.PackageArguments[1];
             String password = session.PackageArguments[2];

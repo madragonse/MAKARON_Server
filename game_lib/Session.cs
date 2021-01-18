@@ -15,11 +15,15 @@ namespace game_lib
         private byte[] buffer;
         public int id;
         public NetworkStream stream;
+        public String userName;
+
+
         private Communication_Package pingPackage;
         private List<String> packageArguments;
         private Queue<Package> enquedPackages;
         private Mutex QueueMutex = new Mutex();
         private String unfinishedPackageBuffer = "";
+        
 
         #region field_definitions
         public int Id { get => id; set=> id=value; }

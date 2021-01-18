@@ -158,7 +158,7 @@ namespace game_lib
         {
             playerListMutex.WaitOne();
             foreach (LobbyPlayer w in waitingPlayers) {
-                if (w.Session == p) { playerListMutex.ReleaseMutex(); return true; } }
+                if (w.Session.userName == p.userName) { playerListMutex.ReleaseMutex(); return true; } }
             playerListMutex.ReleaseMutex();
             return false;
         }
