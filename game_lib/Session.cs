@@ -106,7 +106,11 @@ namespace game_lib
             foreach (String package in multiplePackageBuffer)
             {
                 p = new Package(package);
-                if (p.getArguments()[0] == "PING") { continue; } //ignore ping packages
+                List<String> args = p.getArguments();
+                if (args.Count == 0) {
+                    continue;
+                }
+                if ( args[0] == "PING") { continue; } //ignore ping packages
                 QueueMutex.WaitOne();
                 this.EnquedPackages.Enqueue(p);
                 QueueMutex.ReleaseMutex();
