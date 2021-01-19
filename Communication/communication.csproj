@@ -62,5 +62,8 @@
       <Name>packages</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="ServerClassDiagram.cd" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

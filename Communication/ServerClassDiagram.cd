@@ -4,7 +4,7 @@
     <Position X="2.967" Y="7.795" Height="0.291" Width="1.011" />
   </Comment>
   <Comment CommentText="&lt;&lt;extends&gt;&gt;">
-    <Position X="8.968" Y="16.906" Height="0.291" Width="1.011" />
+    <Position X="8.234" Y="11.813" Height="0.291" Width="1.011" />
   </Comment>
   <Class Name="communication.Communicator">
     <Position X="5.5" Y="4.75" Width="2.75" />
@@ -17,12 +17,9 @@
     </NestedTypes>
     <AssociationLine Name="currentGame" Type="game_lib.Game" ManuallyRouted="true" FixedFromPoint="true" FixedToPoint="true">
       <Path>
-        <Point X="5.5" Y="5" />
-        <Point X="4.865" Y="5" Type="JumpStart" />
-        <Point X="4.698" Y="5" Type="JumpEnd" />
-        <Point X="2.375" Y="5" />
-        <Point X="2.375" Y="9.688" />
-        <Point X="2.75" Y="9.688" />
+        <Point X="6" Y="8.939" />
+        <Point X="6" Y="10.188" />
+        <Point X="4.25" Y="10.188" />
       </Path>
     </AssociationLine>
     <TypeIdentifier>
@@ -36,7 +33,7 @@
       <Field Name="session" />
     </ShowAsAssociation>
   </Class>
-  <Class Name="communication.GameAndLobbyManager" Collapsed="true">
+  <Class Name="communication.GameAndLobbyManager">
     <Position X="2.75" Y="1.25" Width="2.5" />
     <TypeIdentifier>
       <HashCode>AIRAAAAAAAACABAAAAAAAAAABAAABAAAAAAgAFACAAg=</HashCode>
@@ -46,18 +43,6 @@
       <Field Name="games" />
       <Field Name="lobbys" />
     </ShowAsCollectionAssociation>
-  </Class>
-  <Class Name="database.Authentication" Collapsed="true">
-    <Position X="31.5" Y="1" Width="1.5" />
-    <TypeIdentifier />
-  </Class>
-  <Class Name="database.AuthenticationException" Collapsed="true">
-    <Position X="33.5" Y="1" Width="1.5" />
-    <TypeIdentifier />
-  </Class>
-  <Class Name="database.DatabaseConector">
-    <Position X="29.5" Y="1" Width="1.5" />
-    <TypeIdentifier />
   </Class>
   <Class Name="game_lib.Game">
     <Position X="2.75" Y="8.75" Width="1.5" />
@@ -78,12 +63,8 @@
     <Position X="2.75" Y="5.5" Width="1.5" />
     <TypeIdentifier />
   </Class>
-  <Class Name="game_lib.GameException">
-    <Position X="27" Y="1.25" Width="1.5" />
-    <TypeIdentifier />
-  </Class>
-  <Class Name="game_lib.Lobby" Collapsed="true">
-    <Position X="9.75" Y="1.25" Width="1.5" />
+  <Class Name="game_lib.Lobby">
+    <Position X="9.75" Y="1.5" Width="1.5" />
     <NestedTypes>
       <Struct Name="game_lib.Lobby.LobbyPlayer" Collapsed="true">
         <TypeIdentifier />
@@ -92,7 +73,7 @@
     <TypeIdentifier />
   </Class>
   <Class Name="game_lib.Session">
-    <Position X="5.75" Y="12.75" Width="1.5" />
+    <Position X="5" Y="10.5" Width="1.5" />
     <TypeIdentifier />
     <ShowAsAssociation>
       <Property Name="Stream" />
@@ -102,19 +83,19 @@
     </ShowAsCollectionAssociation>
   </Class>
   <Class Name="packages.Bomberman_Package">
-    <Position X="8.75" Y="17.75" Width="1.5" />
+    <Position X="8" Y="12.5" Width="1.5" />
     <TypeIdentifier />
   </Class>
   <Class Name="packages.Communication_Package">
-    <Position X="11" Y="10" Width="1.5" />
+    <Position X="9.75" Y="6" Width="1.5" />
     <TypeIdentifier />
   </Class>
   <Class Name="packages.Package">
-    <Position X="8.75" Y="14.25" Width="1.5" />
+    <Position X="8" Y="9.25" Width="1.5" />
     <TypeIdentifier />
   </Class>
   <Class Name="System.Net.Sockets.NetworkStream">
-    <Position X="2.75" Y="14" Width="1.5" />
+    <Position X="1" Y="7.75" Width="1.5" />
     <TypeIdentifier />
   </Class>
   <Font Name="Segoe UI" Size="9" />
